@@ -1,21 +1,21 @@
 {
   "todoData": {
-    "total": 5,
-    "pending": 5,
+    "total": 6,
+    "pending": 6,
     "completed": 0,
     "priorities": {
       "high": 1,
-      "medium": 0,
+      "medium": 1,
       "low": 4
     },
     "categories": [
       {
         "name": "no category",
-        "value": 5
+        "value": 6
       }
     ],
     "upcomingDeadlines": [],
-    "updatedAt": "2026-02-02T04:37:59.877Z",
+    "updatedAt": "2026-02-02T04:38:20.471Z",
     "todos": [
       {
         "id": 1706428801000,
@@ -54,6 +54,14 @@
         "text": "Test creating dashboard data",
         "completed": false,
         "priority": "high",
+        "dueDate": null,
+        "category": "no category"
+      },
+      {
+        "id": 1770007100413,
+        "text": "Verify dashboard sync works --medium",
+        "completed": false,
+        "priority": "medium",
         "dueDate": null,
         "category": "no category"
       }
