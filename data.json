@@ -121,7 +121,7 @@
     },
     {
       "id": 1770095771564,
-      "text": "Face the openclaw command issue",
+      "text": "Fix the openclaw command issue",
       "completed": false,
       "createdAt": "2026-02-03T05:16:11.564Z",
       "priority": "low",
@@ -154,11 +154,21 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal"
+    },
+    {
+      "id": 1770098953488,
+      "text": "Create a company using bots (nekochan, Lumina, Vivaz, Akili) - Planning phase",
+      "completed": false,
+      "createdAt": "2026-02-03T06:09:13.488Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "ideas"
     }
   ],
   "categories": [
     "personal",
     "no category",
-    "nekochan"
+    "nekochan",
+    "ideas"
   ]
 }
