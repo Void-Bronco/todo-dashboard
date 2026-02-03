@@ -1,5 +1,15 @@
 {
-  "todos": [],
+  "todos": [
+    {
+      "id": 1770129252751,
+      "text": "測試新配置",
+      "completed": false,
+      "createdAt": "2026-02-03T14:34:12.751Z",
+      "priority": "high",
+      "dueDate": "2026-12-31",
+      "category": "personal"
+    }
+  ],
   "categories": [
     "no category",
     "personal"
