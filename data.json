@@ -90,6 +90,15 @@
       "priority": "medium",
       "dueDate": null,
       "category": "nekochan"
+    },
+    {
+      "id": 1770094114279,
+      "text": "Create a bot with single skill",
+      "completed": false,
+      "createdAt": "2026-02-03T04:48:34.279Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "personal"
     }
   ],
   "categories": [
