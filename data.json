@@ -122,11 +122,12 @@
     {
       "id": 14,
       "text": "Fix the openclaw command issue",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-03T05:16:11.564Z",
       "priority": "low",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "completedAt": "2026-02-03T16:14:41.778Z"
     },
     {
       "id": 15,
