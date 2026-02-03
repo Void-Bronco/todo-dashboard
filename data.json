@@ -75,11 +75,12 @@
     {
       "id": 1770085856729,
       "text": "Test unified data storage",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-03T02:30:56.729Z",
       "priority": "high",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "completedAt": "2026-02-03T03:14:32.862Z"
     }
   ],
   "categories": [
