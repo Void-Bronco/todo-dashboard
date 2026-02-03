@@ -8,6 +8,15 @@
       "priority": "high",
       "dueDate": "2026-12-31",
       "category": "work"
+    },
+    {
+      "id": 1770129895601,
+      "text": "test todo item",
+      "completed": false,
+      "createdAt": "2026-02-03T14:44:55.601Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "general"
     }
   ],
   "categories": [
