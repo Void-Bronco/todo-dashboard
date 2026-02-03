@@ -1,1 +1,34 @@
-{"todoData": {"total": 6, "pending": 4, "completed": 2, "priorities": {"high": 0, "medium": 0, "low": 4}, "categories": [{"name": "personal", "value": 4}, {"name": "no category", "value": 2}], "upcomingDeadlines": [], "updatedAt": "2026-02-02T08:16:00.000Z", "todos": [{"id": 1706428801000, "text": "Get TOGAF certificate", "completed": false, "priority": "low", "dueDate": null, "category": "personal"}, {"id": 1706428802000, "text": "Get AWS Professional Solution Architect", "completed": false, "priority": "low", "dueDate": null, "category": "personal"}, {"id": 1706428803000, "text": "Get CFA certificate", "completed": false, "priority": "low", "dueDate": null, "category": "personal"}, {"id": 1706428804000, "text": "Get CISM certificate", "completed": false, "priority": "low", "dueDate": null, "category": "personal"}, {"id": 1770007079874, "text": "Test creating dashboard data", "completed": true, "priority": "high", "dueDate": null, "category": "no category"}, {"id": 1770007100413, "text": "Verify dashboard sync works --medium", "completed": true, "priority": "medium", "dueDate": null, "category": "no category"}]}}
+{
+  "todos": [
+    {
+      "id": 1770081703702,
+      "text": "Login into the Bank of China Mobile app medium personal",
+      "completed": false,
+      "createdAt": "2026-02-03T01:21:43.702Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "no category"
+    },
+    {
+      "id": 1770081797932,
+      "text": "Register frdshub.com in GoDaddy low personal",
+      "completed": false,
+      "createdAt": "2026-02-03T01:23:17.932Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "no category"
+    },
+    {
+      "id": 1770085856729,
+      "text": "Test unified data storage high personal",
+      "completed": false,
+      "createdAt": "2026-02-03T02:30:56.729Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "no category"
+    }
+  ],
+  "categories": [
+    "no category"
+  ]
+}
