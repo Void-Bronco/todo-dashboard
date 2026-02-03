@@ -108,6 +108,15 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal"
+    },
+    {
+      "id": 1770095063882,
+      "text": "Set GitHub Pages to frdshub.com domain",
+      "completed": false,
+      "createdAt": "2026-02-03T05:04:23.882Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "personal"
     }
   ],
   "categories": [
