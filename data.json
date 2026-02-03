@@ -1,5 +1,15 @@
 {
-  "todos": [],
+  "todos": [
+    {
+      "id": 1770128367714,
+      "text": "測試新功能",
+      "completed": false,
+      "createdAt": "2026-02-03T14:19:27.714Z",
+      "priority": "high",
+      "dueDate": "2026-12-31",
+      "category": "personal"
+    }
+  ],
   "categories": [
     "no category",
     "personal"
