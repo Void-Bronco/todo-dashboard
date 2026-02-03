@@ -56,30 +56,30 @@
     },
     {
       "id": 1770081703702,
-      "text": "Login into the Bank of China Mobile app medium personal",
+      "text": "Login into the Bank of China Mobile app",
       "completed": false,
       "createdAt": "2026-02-03T01:21:43.702Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "no category"
+      "category": "personal"
     },
     {
       "id": 1770081797932,
-      "text": "Register frdshub.com in GoDaddy low personal",
+      "text": "Register frdshub.com in GoDaddy",
       "completed": false,
       "createdAt": "2026-02-03T01:23:17.932Z",
-      "priority": "medium",
+      "priority": "low",
       "dueDate": null,
-      "category": "no category"
+      "category": "personal"
     },
     {
       "id": 1770085856729,
-      "text": "Test unified data storage high personal",
+      "text": "Test unified data storage",
       "completed": false,
       "createdAt": "2026-02-03T02:30:56.729Z",
-      "priority": "medium",
+      "priority": "high",
       "dueDate": null,
-      "category": "no category"
+      "category": "personal"
     }
   ],
   "categories": [
