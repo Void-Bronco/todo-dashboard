@@ -99,6 +99,15 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal"
+    },
+    {
+      "id": 1770094225553,
+      "text": "Gemini 3 hackathon",
+      "completed": false,
+      "createdAt": "2026-02-03T04:50:25.553Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "personal"
     }
   ],
   "categories": [
