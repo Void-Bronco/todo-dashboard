@@ -1,5 +1,15 @@
 {
-  "todos": [],
+  "todos": [
+    {
+      "id": 1770129827088,
+      "text": "測試環境變量路徑",
+      "completed": false,
+      "createdAt": "2026-02-03T14:43:47.088Z",
+      "priority": "high",
+      "dueDate": "2026-12-31",
+      "category": "work"
+    }
+  ],
   "categories": [
     "no category",
     "work"
