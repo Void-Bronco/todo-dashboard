@@ -81,10 +81,20 @@
       "dueDate": null,
       "category": "personal",
       "completedAt": "2026-02-03T03:14:32.862Z"
+    },
+    {
+      "id": 1770092879375,
+      "text": "Fix Mark Six draw date accuracy by implementing web browsing to get official HKJC draw dates",
+      "completed": false,
+      "createdAt": "2026-02-03T04:27:59.375Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "nekochan"
     }
   ],
   "categories": [
     "personal",
-    "no category"
+    "no category",
+    "nekochan"
   ]
 }
