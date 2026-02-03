@@ -181,6 +181,15 @@
       "priority": "low",
       "dueDate": null,
       "category": "personal"
+    },
+    {
+      "id": 21,
+      "text": "Test sequential ID assignment",
+      "completed": false,
+      "createdAt": "2026-02-03T15:03:13.610Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "no category"
     }
   ],
   "categories": [
