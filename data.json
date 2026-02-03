@@ -1,7 +1,7 @@
 {
   "todos": [
     {
-      "id": 1706428801000,
+      "id": 1,
       "text": "Get TOGAF certificate",
       "completed": false,
       "createdAt": "2024-01-27T08:00:01.000Z",
@@ -10,7 +10,7 @@
       "category": "personal"
     },
     {
-      "id": 1706428802000,
+      "id": 2,
       "text": "Get AWS Professional Solution Architect",
       "completed": false,
       "createdAt": "2024-01-27T08:00:02.000Z",
@@ -19,7 +19,7 @@
       "category": "personal"
     },
     {
-      "id": 1706428803000,
+      "id": 3,
       "text": "Get CFA certificate",
       "completed": false,
       "createdAt": "2024-01-27T08:00:03.000Z",
@@ -28,7 +28,7 @@
       "category": "personal"
     },
     {
-      "id": 1706428804000,
+      "id": 4,
       "text": "Get CISM certificate",
       "completed": false,
       "createdAt": "2024-01-27T08:00:04.000Z",
@@ -37,7 +37,7 @@
       "category": "personal"
     },
     {
-      "id": 1770007079874,
+      "id": 5,
       "text": "Test creating dashboard data",
       "completed": true,
       "createdAt": "2026-01-29T20:37:59.874Z",
@@ -46,7 +46,7 @@
       "category": "no category"
     },
     {
-      "id": 1770007100413,
+      "id": 6,
       "text": "Verify dashboard sync works --medium",
       "completed": true,
       "createdAt": "2026-01-29T20:38:20.479Z",
@@ -55,7 +55,7 @@
       "category": "no category"
     },
     {
-      "id": 1770081703702,
+      "id": 7,
       "text": "Login into the Bank of China Mobile app",
       "completed": false,
       "createdAt": "2026-02-03T01:21:43.702Z",
@@ -64,7 +64,7 @@
       "category": "personal"
     },
     {
-      "id": 1770081797932,
+      "id": 8,
       "text": "Register frdshub.com in GoDaddy",
       "completed": true,
       "createdAt": "2026-02-03T01:23:17.932Z",
@@ -74,7 +74,7 @@
       "completedAt": "2026-02-03T05:04:59.854Z"
     },
     {
-      "id": 1770085856729,
+      "id": 9,
       "text": "Test unified data storage",
       "completed": true,
       "createdAt": "2026-02-03T02:30:56.729Z",
@@ -84,7 +84,7 @@
       "completedAt": "2026-02-03T03:14:32.862Z"
     },
     {
-      "id": 1770092879375,
+      "id": 10,
       "text": "Fix Mark Six draw date accuracy by implementing web browsing to get official HKJC draw dates",
       "completed": false,
       "createdAt": "2026-02-03T04:27:59.375Z",
@@ -93,7 +93,7 @@
       "category": "nekochan"
     },
     {
-      "id": 1770094114279,
+      "id": 11,
       "text": "Create a bot with single skill",
       "completed": false,
       "createdAt": "2026-02-03T04:48:34.279Z",
@@ -102,7 +102,7 @@
       "category": "personal"
     },
     {
-      "id": 1770094225553,
+      "id": 12,
       "text": "Gemini 3 hackathon",
       "completed": false,
       "createdAt": "2026-02-03T04:50:25.553Z",
@@ -111,7 +111,7 @@
       "category": "personal"
     },
     {
-      "id": 1770095063882,
+      "id": 13,
       "text": "Set GitHub Pages to frdshub.com domain",
       "completed": false,
       "createdAt": "2026-02-03T05:04:23.882Z",
@@ -120,7 +120,7 @@
       "category": "personal"
     },
     {
-      "id": 1770095771564,
+      "id": 14,
       "text": "Fix the openclaw command issue",
       "completed": false,
       "createdAt": "2026-02-03T05:16:11.564Z",
@@ -129,7 +129,7 @@
       "category": "personal"
     },
     {
-      "id": 1770096328922,
+      "id": 15,
       "text": "Create a bot named Vivaz - Latin female, 20 years old, sunny, cheerful, proactive in encouraging exercise",
       "completed": false,
       "createdAt": "2026-02-03T05:25:28.922Z",
@@ -138,7 +138,7 @@
       "category": "personal"
     },
     {
-      "id": 1770096480226,
+      "id": 16,
       "text": "Create a bot named Lumina - White female professional executive, business-oriented, leadership-focused",
       "completed": false,
       "createdAt": "2026-02-03T05:28:00.226Z",
@@ -147,7 +147,7 @@
       "category": "personal"
     },
     {
-      "id": 1770097263604,
+      "id": 17,
       "text": "Create a bot named Akili - Black young girl, techie and hacker, representing wisdom and intelligence",
       "completed": false,
       "createdAt": "2026-02-03T05:41:03.604Z",
@@ -156,7 +156,7 @@
       "category": "personal"
     },
     {
-      "id": 1770098953488,
+      "id": 18,
       "text": "Create a company using bots (nekochan, Lumina, Vivaz, Akili) - Planning phase",
       "completed": false,
       "createdAt": "2026-02-03T06:09:13.488Z",
@@ -165,7 +165,7 @@
       "category": "idea"
     },
     {
-      "id": 1770099536271,
+      "id": 19,
       "text": "Improve dashboard UI without priority tags in text",
       "completed": false,
       "createdAt": "2026-02-03T06:18:56.271Z",
@@ -174,7 +174,7 @@
       "category": "nekochan"
     },
     {
-      "id": 1770130074826,
+      "id": 20,
       "text": "test todo item",
       "completed": false,
       "createdAt": "2026-02-03T14:47:54.826Z",
