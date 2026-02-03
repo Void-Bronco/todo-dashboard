@@ -176,11 +176,12 @@
     {
       "id": 20,
       "text": "test todo item",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-03T14:47:54.826Z",
       "priority": "low",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "completedAt": "2026-02-03T15:13:04.321Z"
     },
     {
       "id": 21,
