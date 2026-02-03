@@ -66,11 +66,12 @@
     {
       "id": 1770081797932,
       "text": "Register frdshub.com in GoDaddy",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-03T01:23:17.932Z",
       "priority": "low",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "completedAt": "2026-02-03T05:04:59.854Z"
     },
     {
       "id": 1770085856729,
@@ -115,6 +116,15 @@
       "completed": false,
       "createdAt": "2026-02-03T05:04:23.882Z",
       "priority": "medium",
+      "dueDate": null,
+      "category": "personal"
+    },
+    {
+      "id": 1770095771564,
+      "text": "Face the openclaw command issue",
+      "completed": false,
+      "createdAt": "2026-02-03T05:16:11.564Z",
+      "priority": "low",
       "dueDate": null,
       "category": "personal"
     }
