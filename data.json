@@ -1,17 +1,7 @@
 {
-  "todos": [
-    {
-      "id": 1770129551380,
-      "text": "測試本地路徑2",
-      "completed": false,
-      "createdAt": "2026-02-03T14:39:11.380Z",
-      "priority": "medium",
-      "dueDate": "2026-11-30",
-      "category": "work"
-    }
-  ],
+  "todos": [],
   "categories": [
     "no category",
-    "work"
+    "general"
   ]
 }
