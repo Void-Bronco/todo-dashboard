@@ -188,11 +188,12 @@
     {
       "id": 21,
       "text": "Test sequential ID assignment",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-03T15:03:13.610Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "no category"
+      "category": "no category",
+      "completedAt": "2026-02-03T16:36:26.844Z"
     }
   ],
   "categories": [
