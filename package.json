@@ -1,0 +1,17 @@
+{
+  "name": "todo-dashboard-tests",
+  "version": "1.0.0",
+  "description": "Unit tests for todo dashboard functionality",
+  "main": "test_updateTodos.js",
+  "scripts": {
+    "test": "node test_updateTodos.js",
+    "test:watch": "nodemon --exec \"npm test\""
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0",
+    "nodemon": "^3.0.0"
+  },
+  "keywords": ["testing", "unit-test", "todo", "dashboard"],
+  "author": "Nekochan",
+  "license": "MIT"
+}
