@@ -1,6 +1,60 @@
 {
   "todos": [
     {
+      "id": 1706428801000,
+      "text": "Get TOGAF certificate",
+      "completed": false,
+      "createdAt": "2024-01-27T08:00:01.000Z",
+      "priority": "low",
+      "dueDate": null,
+      "category": "personal"
+    },
+    {
+      "id": 1706428802000,
+      "text": "Get AWS Professional Solution Architect",
+      "completed": false,
+      "createdAt": "2024-01-27T08:00:02.000Z",
+      "priority": "low",
+      "dueDate": null,
+      "category": "personal"
+    },
+    {
+      "id": 1706428803000,
+      "text": "Get CFA certificate",
+      "completed": false,
+      "createdAt": "2024-01-27T08:00:03.000Z",
+      "priority": "low",
+      "dueDate": null,
+      "category": "personal"
+    },
+    {
+      "id": 1706428804000,
+      "text": "Get CISM certificate",
+      "completed": false,
+      "createdAt": "2024-01-27T08:00:04.000Z",
+      "priority": "low",
+      "dueDate": null,
+      "category": "personal"
+    },
+    {
+      "id": 1770007079874,
+      "text": "Test creating dashboard data",
+      "completed": true,
+      "createdAt": "2026-01-29T20:37:59.874Z",
+      "priority": "high",
+      "dueDate": null,
+      "category": "no category"
+    },
+    {
+      "id": 1770007100413,
+      "text": "Verify dashboard sync works --medium",
+      "completed": true,
+      "createdAt": "2026-01-29T20:38:20.479Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "no category"
+    },
+    {
       "id": 1770081703702,
       "text": "Login into the Bank of China Mobile app medium personal",
       "completed": false,
@@ -29,6 +83,7 @@
     }
   ],
   "categories": [
+    "personal",
     "no category"
   ]
 }
