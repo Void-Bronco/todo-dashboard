@@ -1,17 +1,7 @@
 {
-  "todos": [
-    {
-      "id": 1770129743935,
-      "text": "test todo item",
-      "completed": false,
-      "createdAt": "2026-02-03T14:42:23.935Z",
-      "priority": "medium",
-      "dueDate": null,
-      "category": "general"
-    }
-  ],
+  "todos": [],
   "categories": [
     "no category",
-    "general"
+    "work"
   ]
 }
