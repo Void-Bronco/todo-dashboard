@@ -95,11 +95,12 @@
     {
       "id": 11,
       "text": "Create a bot with single skill",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-03T04:48:34.279Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "completedAt": "2026-02-03T16:25:52.849Z"
     },
     {
       "id": 12,
