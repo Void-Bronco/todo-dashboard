@@ -169,11 +169,12 @@
     {
       "id": 19,
       "text": "Improve dashboard UI without priority tags in text",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-03T06:18:56.271Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "nekochan"
+      "category": "nekochan",
+      "completedAt": "2026-02-03T16:54:28.731Z"
     },
     {
       "id": 20,
