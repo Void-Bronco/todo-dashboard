@@ -163,6 +163,15 @@
       "priority": "low",
       "dueDate": null,
       "category": "idea"
+    },
+    {
+      "id": 1770099536271,
+      "text": "Improve dashboard UI without priority tags in text low idea",
+      "completed": false,
+      "createdAt": "2026-02-03T06:18:56.271Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "no category"
     }
   ],
   "categories": [
