@@ -204,6 +204,15 @@
       "priority": "medium",
       "dueDate": null,
       "category": "lumina"
+    },
+    {
+      "id": 23,
+      "text": "Create functionality to check, grade and track homework assignments",
+      "completed": false,
+      "createdAt": "2026-02-08T06:11:01.220Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "no category"
     }
   ],
   "categories": [
