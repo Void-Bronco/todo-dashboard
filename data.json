@@ -249,11 +249,12 @@
     {
       "id": 30,
       "text": "Updated todo item",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-11T16:39:41.449Z",
       "priority": "low",
       "dueDate": "2026-12-31",
-      "category": "personal"
+      "category": "personal",
+      "completedAt": "2026-02-11T16:40:12.145Z"
     }
   ],
   "categories": [
