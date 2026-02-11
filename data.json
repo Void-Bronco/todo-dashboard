@@ -143,11 +143,12 @@
     {
       "id": 16,
       "text": "Create a bot named Lumina - White female professional executive, business-oriented, leadership-focused",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-03T05:28:00.226Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "completedAt": "2026-02-11T08:38:31.343Z"
     },
     {
       "id": 17,
