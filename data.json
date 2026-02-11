@@ -114,11 +114,12 @@
     {
       "id": 13,
       "text": "Set GitHub Pages to frdshub.com domain",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-03T05:04:23.882Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "completedAt": "2026-02-11T08:48:01.634Z"
     },
     {
       "id": 14,
