@@ -228,15 +228,6 @@
       "dueDate": "2026-03-26",
       "category": "no category",
       "completedAt": "2026-02-11T08:55:00.565Z"
-    },
-    {
-      "id": 27,
-      "text": "--medium Amazon Nova AI Hackathon https://amazon-nova.devpost.com",
-      "completed": false,
-      "createdAt": "2026-02-11T08:55:22.079Z",
-      "priority": "medium",
-      "dueDate": "2026-03-17",
-      "category": "no category"
     }
   ],
   "categories": [
