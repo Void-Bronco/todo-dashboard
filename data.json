@@ -237,6 +237,15 @@
       "priority": "medium",
       "dueDate": "2026-03-17",
       "category": "no category"
+    },
+    {
+      "id": 26,
+      "text": "--medium GitLab AI Hackathon https://gitlab.devpost.com/ Deadline Mar 26, 2026 @ 2:00am GMT+8",
+      "completed": false,
+      "createdAt": "2026-02-11T08:55:04.477Z",
+      "priority": "medium",
+      "dueDate": "2026-03-26",
+      "category": "no category"
     }
   ],
   "categories": [
