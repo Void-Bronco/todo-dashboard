@@ -105,11 +105,12 @@
     {
       "id": 12,
       "text": "Gemini 3 hackathon",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-03T04:50:25.553Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "completedAt": "2026-02-11T08:48:57.384Z"
     },
     {
       "id": 13,
