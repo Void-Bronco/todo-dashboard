@@ -222,11 +222,12 @@
     {
       "id": 24,
       "text": "GitLab AI Hackathon https://gitlab.devpost.com/ Deadline Mar 26, 2026 @ 2:00am GMT+8",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-11T08:53:25.892Z",
       "priority": "high",
       "dueDate": "2026-03-26",
-      "category": "no category"
+      "category": "no category",
+      "completedAt": "2026-02-11T08:55:00.565Z"
     },
     {
       "id": 25,
