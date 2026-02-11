@@ -248,12 +248,12 @@
     },
     {
       "id": 30,
-      "text": "Test todo item --priority high",
+      "text": "Updated todo item",
       "completed": false,
       "createdAt": "2026-02-11T16:39:41.449Z",
-      "priority": "medium",
+      "priority": "low",
       "dueDate": "2026-12-31",
-      "category": "work"
+      "category": "personal"
     }
   ],
   "categories": [
