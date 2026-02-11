@@ -153,11 +153,12 @@
     {
       "id": 17,
       "text": "Create a bot named Akili - Black young girl, techie and hacker, representing wisdom and intelligence",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-02-03T05:41:03.604Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "completedAt": "2026-02-11T08:38:35.001Z"
     },
     {
       "id": 18,
