@@ -245,6 +245,15 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal"
+    },
+    {
+      "id": 30,
+      "text": "Test task for editing --priority medium",
+      "completed": false,
+      "createdAt": "2026-02-11T16:43:42.151Z",
+      "priority": "medium",
+      "dueDate": "2026-12-31",
+      "category": "work"
     }
   ],
   "categories": [
