@@ -230,15 +230,6 @@
       "completedAt": "2026-02-11T08:55:00.565Z"
     },
     {
-      "id": 26,
-      "text": "--medium GitLab AI Hackathon https://gitlab.devpost.com",
-      "completed": false,
-      "createdAt": "2026-02-11T08:56:02.732Z",
-      "priority": "medium",
-      "dueDate": "2026-03-26",
-      "category": "no category"
-    },
-    {
       "id": 27,
       "text": "--medium Amazon Nova AI Hackathon https://amazon-nova.devpost.com",
       "completed": false,
