@@ -245,6 +245,15 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal"
+    },
+    {
+      "id": 30,
+      "text": "Test todo item --priority high",
+      "completed": false,
+      "createdAt": "2026-02-11T16:39:41.449Z",
+      "priority": "medium",
+      "dueDate": "2026-12-31",
+      "category": "work"
     }
   ],
   "categories": [
