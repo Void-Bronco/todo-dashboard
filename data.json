@@ -47,7 +47,7 @@
     },
     {
       "id": 6,
-      "text": "Verify dashboard sync works --medium",
+      "text": "Verify dashboard sync works",
       "completed": true,
       "createdAt": "2026-01-29T20:38:20.479Z",
       "priority": "medium",
@@ -248,12 +248,13 @@
     },
     {
       "id": 30,
-      "text": "Test task for editing --priority medium",
-      "completed": false,
+      "text": "Even more updated test task",
+      "completed": true,
       "createdAt": "2026-02-11T16:43:42.151Z",
-      "priority": "medium",
-      "dueDate": "2026-12-31",
-      "category": "work"
+      "priority": "high",
+      "dueDate": "2027-01-15",
+      "category": "personal",
+      "completedAt": "2026-02-11T16:43:49.165Z"
     }
   ],
   "categories": [
