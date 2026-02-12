@@ -248,16 +248,6 @@
       "dueDate": "2027-01-15",
       "category": "personal",
       "completedAt": "2026-02-11T16:43:49.165Z"
-    },
-    {
-      "id": 33,
-      "text": "Another default todo",
-      "completed": false,
-      "createdAt": "2026-02-12T00:48:45.012Z",
-      "priority": "medium",
-      "dueDate": null,
-      "category": "no category",
-      "assignee": "Charlie"
     }
   ],
   "categories": [
