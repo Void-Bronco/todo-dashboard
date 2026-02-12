@@ -209,7 +209,8 @@
       "createdAt": "2026-02-04T05:06:25.126Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "lumina"
+      "category": "no category",
+      "assignee": "lumina"
     },
     {
       "id": 23,
