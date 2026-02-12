@@ -240,15 +240,6 @@
       "category": "no category"
     },
     {
-      "id": 29,
-      "text": "--medium repair safe",
-      "completed": false,
-      "createdAt": "2026-02-11T15:26:12.619Z",
-      "priority": "medium",
-      "dueDate": null,
-      "category": "personal"
-    },
-    {
       "id": 30,
       "text": "Even more updated test task",
       "completed": true,
