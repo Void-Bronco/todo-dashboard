@@ -250,16 +250,6 @@
       "completedAt": "2026-02-11T16:43:49.165Z"
     },
     {
-      "id": 32,
-      "text": "Test todo 2",
-      "completed": false,
-      "createdAt": "2026-02-12T00:47:49.565Z",
-      "priority": "medium",
-      "dueDate": null,
-      "category": "no category",
-      "assignee": "Alice"
-    },
-    {
       "id": 33,
       "text": "Another default todo",
       "completed": false,
