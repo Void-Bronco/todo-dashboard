@@ -61,7 +61,8 @@
       "createdAt": "2026-02-03T01:21:43.702Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "assignee": "Neo"
     },
     {
       "id": 8,
