@@ -90,7 +90,8 @@
       "createdAt": "2026-02-03T04:27:59.375Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "nekochan"
+      "category": "no category",
+      "assignee": "nekochan"
     },
     {
       "id": 11,
