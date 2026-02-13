@@ -250,6 +250,16 @@
       "dueDate": "2027-01-15",
       "category": "personal",
       "completedAt": "2026-02-11T16:43:49.165Z"
+    },
+    {
+      "id": 31,
+      "text": "sandbox Lumina",
+      "completed": false,
+      "createdAt": "2026-02-13T05:17:07.952Z",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "no category",
+      "assignee": "Neo"
     }
   ],
   "categories": [
