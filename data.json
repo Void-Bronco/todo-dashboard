@@ -7,7 +7,9 @@
       "createdAt": "2024-01-27T08:00:01.000Z",
       "priority": "low",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "assignee": null,
+      "completedAt": null
     },
     {
       "id": 2,
@@ -16,7 +18,9 @@
       "createdAt": "2024-01-27T08:00:02.000Z",
       "priority": "low",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "assignee": null,
+      "completedAt": null
     },
     {
       "id": 3,
@@ -25,7 +29,9 @@
       "createdAt": "2024-01-27T08:00:03.000Z",
       "priority": "low",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "assignee": null,
+      "completedAt": null
     },
     {
       "id": 4,
@@ -34,7 +40,9 @@
       "createdAt": "2024-01-27T08:00:04.000Z",
       "priority": "low",
       "dueDate": null,
-      "category": "personal"
+      "category": "personal",
+      "assignee": null,
+      "completedAt": null
     },
     {
       "id": 5,
@@ -43,7 +51,9 @@
       "createdAt": "2026-01-29T20:37:59.874Z",
       "priority": "high",
       "dueDate": null,
-      "category": "no category"
+      "category": "no category",
+      "assignee": null,
+      "completedAt": null
     },
     {
       "id": 6,
@@ -52,7 +62,9 @@
       "createdAt": "2026-01-29T20:38:20.479Z",
       "priority": "medium",
       "dueDate": null,
-      "category": "no category"
+      "category": "no category",
+      "assignee": null,
+      "completedAt": null
     },
     {
       "id": 7,
@@ -62,7 +74,8 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal",
-      "assignee": "Neo"
+      "assignee": "Neo",
+      "completedAt": null
     },
     {
       "id": 8,
@@ -72,6 +85,7 @@
       "priority": "low",
       "dueDate": null,
       "category": "personal",
+      "assignee": null,
       "completedAt": "2026-02-03T05:04:59.854Z"
     },
     {
@@ -82,6 +96,7 @@
       "priority": "high",
       "dueDate": null,
       "category": "personal",
+      "assignee": "Neo",
       "completedAt": "2026-02-03T03:14:32.862Z"
     },
     {
@@ -92,7 +107,8 @@
       "priority": "medium",
       "dueDate": null,
       "category": "no category",
-      "assignee": "isadora"
+      "assignee": "isadora",
+      "completedAt": null
     },
     {
       "id": 11,
@@ -102,6 +118,7 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal",
+      "assignee": null,
       "completedAt": "2026-02-03T16:25:52.849Z"
     },
     {
@@ -112,6 +129,7 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal",
+      "assignee": null,
       "completedAt": "2026-02-11T08:48:57.384Z"
     },
     {
@@ -122,6 +140,7 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal",
+      "assignee": null,
       "completedAt": "2026-02-11T08:48:01.634Z"
     },
     {
@@ -132,6 +151,7 @@
       "priority": "low",
       "dueDate": null,
       "category": "personal",
+      "assignee": null,
       "completedAt": "2026-02-03T16:14:41.778Z"
     },
     {
@@ -142,6 +162,7 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal",
+      "assignee": null,
       "completedAt": "2026-02-11T08:38:27.607Z"
     },
     {
@@ -152,6 +173,7 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal",
+      "assignee": null,
       "completedAt": "2026-02-11T08:38:31.343Z"
     },
     {
@@ -162,6 +184,7 @@
       "priority": "medium",
       "dueDate": null,
       "category": "personal",
+      "assignee": null,
       "completedAt": "2026-02-11T08:38:35.001Z"
     },
     {
@@ -171,7 +194,9 @@
       "createdAt": "2026-02-03T06:09:13.488Z",
       "priority": "low",
       "dueDate": null,
-      "category": "idea"
+      "category": "idea",
+      "assignee": null,
+      "completedAt": null
     },
     {
       "id": 19,
@@ -192,6 +217,7 @@
       "priority": "low",
       "dueDate": null,
       "category": "personal",
+      "assignee": null,
       "completedAt": "2026-02-03T15:13:04.321Z"
     },
     {
@@ -202,6 +228,7 @@
       "priority": "medium",
       "dueDate": null,
       "category": "no category",
+      "assignee": null,
       "completedAt": "2026-02-03T16:36:26.844Z"
     },
     {
@@ -212,7 +239,8 @@
       "priority": "medium",
       "dueDate": null,
       "category": "no category",
-      "assignee": "lumina"
+      "assignee": "lumina",
+      "completedAt": null
     },
     {
       "id": 23,
@@ -222,6 +250,7 @@
       "priority": "medium",
       "dueDate": null,
       "category": "no category",
+      "assignee": null,
       "completedAt": "2026-03-29T23:38:02.651820"
     },
     {
@@ -231,7 +260,9 @@
       "createdAt": "2026-02-11T09:00:24.160Z",
       "priority": "medium",
       "dueDate": "2026-03-26",
-      "category": "personal"
+      "category": "personal",
+      "assignee": null,
+      "completedAt": null
     },
     {
       "id": 30,
@@ -241,6 +272,7 @@
       "priority": "high",
       "dueDate": "2027-01-15",
       "category": "personal",
+      "assignee": null,
       "completedAt": "2026-02-11T16:43:49.165Z"
     },
     {
