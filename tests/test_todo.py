@@ -654,3 +654,248 @@ class TestConfigAndStorage:
             assert 'not defined' in str(e).lower() or 'config' in str(e).lower()
         finally:
             config_module.Config._find_config = original_find
+
+
+class TestListCommandOutput:
+    def test_list_returns_todo_items(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo_manager.add_todo('Test task', 'high', '2026-04-01', 'work', 'Neo')
+
+        todos = todo_manager.list_todos('all')
+
+        assert len(todos) == 1
+        assert todos[0].text == 'Test task'
+        assert todos[0].priority == 'high'
+        assert todos[0].dueDate == '2026-04-01'
+        assert todos[0].category == 'work'
+        assert todos[0].assignee == 'Neo'
+
+    def test_list_with_assignee_filter(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo_manager.add_todo('Task 1', 'medium', None, 'no category', 'Neo')
+        todo_manager.add_todo('Task 2', 'medium', None, 'no category', 'Jane')
+        todo_manager.add_todo('Task 3', 'medium', None, 'no category', 'Neo')
+
+        todos = todo_manager.list_todos('all', None, 'Neo')
+
+        assert len(todos) == 2
+        assert all(t.assignee == 'Neo' for t in todos)
+
+    def test_list_with_category_filter_case_insensitive(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo_manager.add_category('Work')
+        todo_manager.add_todo('Task 1', 'medium', None, 'Work')
+        todo_manager.add_todo('Task 2', 'medium', None, 'work')
+
+        todos = todo_manager.list_todos('all', 'WORK')
+
+        assert len(todos) == 2
+
+    def test_list_empty_result(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        todos = todo_manager.list_todos('all')
+
+        assert len(todos) == 0
+
+    def test_list_filter_pending_only(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo_manager.add_todo('Pending task')
+        todo_manager.add_todo('Completed task')
+        todo_manager.mark_complete(todo_manager.list_todos('all')[1].id)
+
+        pending = todo_manager.list_todos('pending')
+
+        assert len(pending) == 1
+        assert pending[0].text == 'Pending task'
+        assert pending[0].completed is False
+
+    def test_list_filter_completed_only(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo_manager.add_todo('Pending task')
+        todo_manager.add_todo('Completed task')
+        todo_manager.mark_complete(todo_manager.list_todos('all')[1].id)
+
+        completed = todo_manager.list_todos('completed')
+
+        assert len(completed) == 1
+        assert completed[0].text == 'Completed task'
+        assert completed[0].completed is True
+
+
+class TestUpdateCommand:
+    def test_update_priority(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        updated = todo_manager.update_todo(todo.id, priority='high')
+
+        assert updated.priority == 'high'
+
+    def test_update_assignee(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        updated = todo_manager.update_todo(todo.id, assignee='Neo')
+
+        assert updated.assignee == 'Neo'
+
+    def test_update_assignee_empty_string(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task', assignee='Neo')
+
+        updated = todo_manager.update_todo(todo.id, assignee='')
+
+        assert updated.assignee == ''
+
+    def test_update_multiple_fields(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        updated = todo_manager.update_todo(todo.id, priority='high', assignee='Neo', due_date='2026-04-01')
+
+        assert updated.priority == 'high'
+        assert updated.assignee == 'Neo'
+        assert updated.dueDate == '2026-04-01'
+
+    def test_update_text(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        updated = todo_manager.update_todo(todo.id, text='Updated text')
+
+        assert updated.text == 'Updated text'
+
+    def test_update_invalid_priority_raises_error(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        with pytest.raises(ValueError, match='Invalid priority'):
+            todo_manager.update_todo(todo.id, priority='invalid')
+
+    def test_update_empty_text_raises_error(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        with pytest.raises(ValueError, match='Todo text cannot be empty'):
+            todo_manager.update_todo(todo.id, text='')
+
+    def test_update_nonexistent_todo_returns_none(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        result = todo_manager.update_todo(99999, priority='high')
+
+        assert result is None
+
+    def test_update_due_date_clears_with_empty(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task', due_date='2026-04-01')
+
+        updated = todo_manager.update_todo(todo.id, due_date='')
+
+        assert updated.dueDate == ''
+
+    def test_update_invalid_due_date_raises_error(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        with pytest.raises(ValueError, match='Invalid due date format'):
+            todo_manager.update_todo(todo.id, due_date='invalid-date')
+
+    def test_update_category_creates_new_category(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        updated = todo_manager.update_todo(todo.id, category='NewCategory')
+
+        assert updated.category == 'NewCategory'
+        assert 'NewCategory' in todo_manager.list_categories()
+
+    def test_update_completed_status(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        updated = todo_manager.update_todo(todo.id, completed=True)
+
+        assert updated.completed is True
+        assert updated.completedAt is not None
+
+    def test_update_pending_status_clears_completedAt(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+        todo_manager.mark_complete(todo.id)
+
+        updated = todo_manager.update_todo(todo.id, completed=False)
+
+        assert updated.completed is False
+        assert updated.completedAt is None
+
+
+class TestTodoItemModel:
+    def test_todo_item_dict_access(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task', 'high', '2026-04-01', 'work', 'Neo')
+
+        assert todo['text'] == 'Test task'
+        assert todo['priority'] == 'high'
+        assert todo['dueDate'] == '2026-04-01'
+        assert todo['category'] == 'work'
+        assert todo['assignee'] == 'Neo'
+
+    def test_todo_item_get_method(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        assert todo.get('text') == 'Test task'
+        assert todo.get('nonexistent', 'default') == 'default'
+
+    def test_todo_item_contains(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        assert 'text' in todo
+        assert 'nonexistent' not in todo
+
+    def test_todo_item_assignment(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+
+        todo.text = 'Updated text'
+        todo.assignee = 'Neo'
+
+        assert todo.text == 'Updated text'
+        assert todo.assignee == 'Neo'
+
+    def test_todo_item_model_dump(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task', 'high', '2026-04-01', 'work', 'Neo')
+
+        data = todo.model_dump()
+
+        assert data['text'] == 'Test task'
+        assert data['priority'] == 'high'
+        assert data['dueDate'] == '2026-04-01'
+        assert data['category'] == 'work'
+        assert data['assignee'] == 'Neo'
+        assert data['completed'] is False
+
+    def test_todo_item_backward_compatibility_missing_fields(self, mock_storage):
+        mock_storage.set_data({
+            'todos': [
+                {
+                    'id': 1,
+                    'text': 'Minimal task',
+                    'completed': False
+                }
+            ],
+            'categories': ['no category']
+        })
+
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todos = todo_manager.list_todos()
+
+        assert len(todos) == 1
+        assert todos[0].text == 'Minimal task'
+        assert todos[0].assignee is None
+        assert todos[0].completedAt is None
+        assert todos[0].priority == 'medium'

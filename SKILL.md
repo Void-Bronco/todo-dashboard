@@ -29,9 +29,7 @@ This skill allows users to manage their personal todo lists with the following f
 When the user wants to manage their todo list, execute the appropriate command using the exec tool:
 
 - Use `exec command="python {baseDir}/todo.py add [--priority high|medium|low] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] <item text>"` to add a new item to the todo list
-- Use `exec command="python {baseDir}/todo.py list [--filter all|pending|completed] [--assignee NAME]"` to show pending items (default)
-- Use `exec command="python {baseDir}/todo.py list --all"` to show all items
-- Use `exec command="python {baseDir}/todo.py list --completed"` to show completed items
+- Use `exec command="python {baseDir}/todo.py list [--filter all|pending|completed] [--assignee NAME] [--fields FIELD1,FIELD2] [--json|--text]"` to show pending items (default: JSON output)
 - Use `exec command="python {baseDir}/todo.py update <id> [--text \"text\"] [--priority high|medium|low] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--completed|--pending]"` to update a todo item
 - Use `exec command="python {baseDir}/todo.py complete <id>"` to mark an item as completed
 - Use `exec command="python {baseDir}/todo.py remove <id>"` to remove an item completely
@@ -45,14 +43,18 @@ When the user wants to manage their todo list, execute the appropriate command u
 
 ## List Command Defaults
 
-By default, `list` shows **pending items only**. Use flags to change:
+By default, `list` shows **pending items only** in **JSON format**. Use flags to change:
 
 ```bash
-todo list                    # Show pending items (default)
-todo list --all              # Show all items
-todo list --completed        # Show completed items only
-todo list --assignee work   # Filter by assignee (case insensitive)
+todo list                    # Show pending items in JSON (default)
+todo list --all              # Show all items in JSON
+todo list --completed        # Show completed items only in JSON
+todo list --assignee work   # Filter by assignee
+todo list --fields text,priority,dueDate  # Show only specific fields
+todo list --text             # Output in human-readable text format
 ```
+
+Available fields: `id`, `text`, `priority`, `dueDate`, `category`, `assignee`, `completed`
 
 ## Integration with Cron for Reminders
 

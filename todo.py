@@ -139,7 +139,7 @@ class TodoManager:
         self.save_todos()
         return new_todo
 
-    def list_todos(self, filter_type='all', category=None):
+    def list_todos(self, filter_type='all', category=None, assignee=None):
         filtered_todos = list(self.todos)
 
         if category:
@@ -154,6 +154,13 @@ class TodoManager:
                     todo for todo in filtered_todos
                     if todo.category.lower() == category_lower
                 ]
+
+        if assignee:
+            assignee_lower = assignee.lower()
+            filtered_todos = [
+                todo for todo in filtered_todos
+                if todo.assignee and todo.assignee.lower() == assignee_lower
+            ]
 
         if filter_type == 'pending':
             filtered_todos = [todo for todo in filtered_todos if not todo.completed]
@@ -400,26 +407,40 @@ Examples:
     elif command in ('list', 'show'):
         if args and args[0] in ('-h', '--help'):
             print('''Usage:
-  todo list [--filter all|pending|completed] [--assignee NAME]
+  todo list [--filter all|pending|completed] [--category NAME] [--assignee NAME] [--fields FIELD1,FIELD2,...] [--json|--text]
 
 Options:
   --filter all|pending|completed    Filter by status (default: pending)
-  --assignee NAME                     Filter by assignee (case insensitive)
-  --pending                           Show pending todos only (default)
-  --completed                         Show completed todos only
-  --all                              Show all todos
-  -h, --help                          Show this help message''')
+  --category NAME                   Filter by category (case insensitive)
+  --assignee NAME                   Filter by assignee (case insensitive)
+  --pending                         Show pending todos only (default)
+  --completed                       Show completed todos only
+  --all                             Show all todos
+  --fields FIELD1,FIELD2,...        Fields to display (for --text and --json)
+                                      Available: id, text, priority, dueDate, category, assignee, completed
+  --json                            Output in JSON format (default)
+  --text                            Output in human-readable text format
+  -h, --help                        Show this help message''')
             sys.exit(0)
 
         filter_type = 'pending'
         category_filter = None
+        assignee_filter = None
+        fields = None
+        output_format = 'json'
 
         i = 0
         while i < len(args):
             if args[i] == '--filter' and i + 1 < len(args):
                 filter_type = args[i + 1]
                 i += 2
-            elif args[i] in ('--category', '--assignee', '-a') and i + 1 < len(args):
+            elif args[i] == '--category' and i + 1 < len(args):
+                category_filter = args[i + 1]
+                i += 2
+            elif args[i] == '--assignee' and i + 1 < len(args):
+                assignee_filter = args[i + 1]
+                i += 2
+            elif args[i] == '-a' and i + 1 < len(args):
                 category_filter = args[i + 1]
                 i += 2
             elif args[i] == '--pending':
@@ -431,27 +452,71 @@ Options:
             elif args[i] == '--all':
                 filter_type = 'all'
                 i += 1
+            elif args[i] == '--fields' and i + 1 < len(args):
+                fields = [f.strip() for f in args[i + 1].split(',')]
+                i += 2
+            elif args[i] == '--json':
+                output_format = 'json'
+                i += 1
+            elif args[i] == '--text':
+                output_format = 'text'
+                i += 1
             else:
                 i += 1
 
-        todos = todo_manager.list_todos(filter_type, category_filter)
+        todos = todo_manager.list_todos(filter_type, category_filter, assignee_filter)
 
         if not todos:
-            filter_text = 'items' if filter_type == 'all' else filter_type
-            category_text = f" for assignee '{category_filter}'" if category_filter else ''
-            print(f'No {filter_text} todos found{category_text}.')
+            if output_format == 'json':
+                print('[]')
+            else:
+                filter_text = 'items' if filter_type == 'all' else filter_type
+                category_text = f" for category '{category_filter}'" if category_filter else ''
+                assignee_text = f" for assignee '{assignee_filter}'" if assignee_filter else ''
+                print(f'No {filter_text} todos found{category_text}{assignee_text}.')
         else:
-            title = f"{filter_type.capitalize() if filter_type != 'all' else 'All'} Todos"
-            if category_filter:
-                title += f" for assignee '{category_filter}'"
-            print(f'{title}:')
+            if output_format == 'json':
+                import json
+                if fields:
+                    output_todos = [
+                        {k: v for k, v in todo.model_dump().items() if k in fields and v is not None}
+                        for todo in todos
+                    ]
+                else:
+                    output_todos = [
+                        {k: v for k, v in todo.model_dump().items() if v is not None}
+                        for todo in todos
+                    ]
+                print(json.dumps(output_todos, indent=2))
+            else:
+                title = f"{filter_type.capitalize() if filter_type != 'all' else 'All'} Todos"
+                if category_filter:
+                    title += f" for category '{category_filter}'"
+                if assignee_filter:
+                    title += f" for assignee '{assignee_filter}'"
+                print(f'{title}:')
 
-            for todo in todos:
-                status = '[x]' if todo.completed else '[ ]'
-                priority = f'[{todo.priority}]'
-                due_info = f' (Due: {todo.dueDate})' if todo.dueDate else ''
-                assignee_info = f' @{todo.assignee}' if todo.assignee else ''
-                print(f'{status} #{todo.id} {priority} {todo.text}{due_info}{assignee_info}')
+                for todo in todos:
+                    parts = []
+                    if fields is None or 'id' in fields:
+                        parts.append(f'#{todo.id}')
+                    if fields is None or 'completed' in fields:
+                        status = '[x]' if todo.completed else '[ ]'
+                        parts.append(status)
+                    if fields is None or 'priority' in fields:
+                        parts.append(f'[{todo.priority}]')
+                    if fields is None or 'text' in fields:
+                        parts.append(todo.text)
+                    if fields is None or 'dueDate' in fields:
+                        if todo.dueDate:
+                            parts.append(f'(Due: {todo.dueDate})')
+                    if fields is None or 'category' in fields:
+                        if todo.category and todo.category != 'no category':
+                            parts.append(f'[{todo.category}]')
+                    if fields is None or 'assignee' in fields:
+                        if todo.assignee:
+                            parts.append(f'@{todo.assignee}')
+                    print(' '.join(parts))
 
     elif command in ('complete', 'done'):
         if not args:
