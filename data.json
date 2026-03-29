@@ -259,9 +259,9 @@
       "completed": false,
       "createdAt": "2026-02-11T09:00:24.160Z",
       "priority": "medium",
-      "dueDate": "2026-03-26",
+      "dueDate": null,
       "category": "personal",
-      "assignee": null,
+      "assignee": "Neo",
       "completedAt": null
     },
     {
