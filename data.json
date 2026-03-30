@@ -340,6 +340,17 @@
       "category": "personal",
       "assignee": "Neo",
       "completedAt": null
+    },
+    {
+      "id": 1774868905226896,
+      "text": "Debug persist test",
+      "completed": false,
+      "createdAt": "2026-03-30T19:08:25.226900",
+      "priority": "low",
+      "dueDate": null,
+      "category": "personal",
+      "assignee": "Neo",
+      "completedAt": null
     }
   ],
   "categories": [
