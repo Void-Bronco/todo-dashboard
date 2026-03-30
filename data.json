@@ -351,6 +351,17 @@
       "category": "personal",
       "assignee": "Neo",
       "completedAt": null
+    },
+    {
+      "id": 1774868930508990,
+      "text": "Patch test",
+      "completed": false,
+      "createdAt": "2026-03-30T19:08:50.508994",
+      "priority": "low",
+      "dueDate": null,
+      "category": "no category",
+      "assignee": null,
+      "completedAt": null
     }
   ],
   "categories": [
