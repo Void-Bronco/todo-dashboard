@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; text-align: center; }
+        .stat-value { font-size: 2em; font-weight: bold; color: #333; }
+        .stat-label { font-size: 0.9em; color: #666; }
+        .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .chart-container { min-height: 300px; /* allows growth */ border: 1px solid #ddd; border-radius: 5px; padding: 10px; }
+        .todos { margin-top: 20px; }
+        .todo-item { padding: 10px; margin: 5px 0; border-bottom: 1px solid #eee; }
+        .completed { text-decoration: line-through; color: #888; }
+        .priority-high { border-left: 4px solid red; }
+        .priority-medium { border-left: 4px solid orange; }
+        .priority-low { border-left: 4px solid green; }
+        #refreshBtn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #refreshBtn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo Dashboard</h1>
+    <div style="text-align: right; margin-top: -40px;">
+        <button id="refreshBtn" onclick="loadTodoData()" title="Refresh data">🔄 Refresh</button>
+    </div>
+    <div class="stats" id="stats">
+        <!-- Stats will be populated here -->
+    </div>
+    <div class="todos" id="pendingTodos">
+        <h2>Pending Tasks</h2>
+        <!-- Pending todo items will be populated here -->
+    </div>
+    <div class="todos" id="completedTodos">
+        <h2 style="cursor: pointer;" onclick="toggleCompleted()">Completed Tasks <span id="toggleIcon">▼</span></h2>
+        <div id="completedList" style="display: none;">
+            <!-- Completed todo items will be populated here -->
+        </div>
+    </div>
+    <div class="charts">
+        <div class="chart-container">
+            <h3>Task Status</h3>
+            <div id="statusChart" style="width: 100%; height: 100%;"></div>
+        </div>
+        <div class="chart-container">
+            <h3>Priority Distribution</h3>
+            <div id="priorityChart" style="width: 100%; height: 100%;"></div>
+        </div>
+        <div class="chart-container">
+            <h3>Category Distribution</h3>
+            <div id="categoryChart" style="width: 100%; height: 100%;"></div>
+        </div>
+        <div class="chart-container">
+            <h3>Assignee Distribution</h3>
+            <div id="assigneeChart" style="width: 100%; height: 100%;"></div>
+        </div>
+    </div>
+    <div id="controls-bottom" style="text-align: center; margin-top: 20px;">
+        <label for="includeCompleted">
+            <input type="checkbox" id="includeCompleted" onchange="loadTodoData()"> Include Completed in Charts
+        </label>
+    </div>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://vatpohdczqnucyizluab.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_SYuWbBBZ_TNjt8ra8faH-g_J2LJc-mN';
+
+        // Global chart variables
+        let statusChart, priorityChart, categoryChart, assigneeChart;
+
+        // Initialize charts when the page loads
+        function initCharts() {
+            statusChart = echarts.init(document.getElementById('statusChart'));
+            priorityChart = echarts.init(document.getElementById('priorityChart'));
+            categoryChart = echarts.init(document.getElementById('categoryChart'));
+            assigneeChart = echarts.init(document.getElementById('assigneeChart'));
+        }
+
+        async function loadTodoData() {
+            try {
+                const headers = {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                };
+
+                const [todosRes, categoriesRes] = await Promise.all([
+                    fetch(`${SUPABASE_URL}/rest/v1/todos?select=*`, { headers }),
+                    fetch(`${SUPABASE_URL}/rest/v1/categories?select=*`, { headers })
+                ]);
+
+                const todos = await todosRes.json();
+                const categories = await categoriesRes.json();
+
+                const fullData = {
+                    todos: todos,
+                    categories: categories.map(c => c.name)
+                };
+                
+                const includeCompleted = document.getElementById('includeCompleted').checked;
+                
+                // Filter todos based on toggle for distribution charts
+                const todosForDistribution = includeCompleted ? fullData.todos : fullData.todos.filter(t => !t.completed);
+                
+                // Calculate derived data from the todos array
+                const data = {
+                    total: fullData.todos.length,
+                    pending: fullData.todos.filter(t => !t.completed).length,
+                    completed: fullData.todos.filter(t => t.completed).length,
+                    priorities: {
+                        high: todosForDistribution.filter(t => t.priority === 'high').length,
+                        medium: todosForDistribution.filter(t => t.priority === 'medium').length,
+                        low: todosForDistribution.filter(t => t.priority === 'low').length
+                    },
+                    categories: fullData.categories.map(cat => ({
+                        name: cat,
+                        value: todosForDistribution.filter(t => t.category === cat).length
+                    })),
+                    assignees: calculateAssigneeDistribution(todosForDistribution),
+                    todos: fullData.todos
+                };
+                
+                updateStats(data);
+                updateTodos(data.todos);
+                updateCharts(data);
+            } catch (error) {
+                console.error('Error loading todo data:', error);
+                document.body.innerHTML = '<p>Error loading data. Please check the data source.</p>';
+            }
+        }
+
+        function updateCharts(data) {
+            // Task Status Chart (Completed vs Pending)
+            const statusOption = {
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'horizontal',
+                    bottom: '5%',
+                    padding: [20, 0, 0, 0]
+                },
+                series: [{
+                    name: 'Task Status',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    data: [
+                        { value: data.completed, name: 'Completed' },
+                        { value: data.pending, name: 'Pending' }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }]
+            };
+            
+            // Priority Distribution Chart
+            const priorityOption = {
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'horizontal',
+                    bottom: '5%',
+                    padding: [20, 0, 0, 0]
+                },
+                series: [{
+                    name: 'Priority Levels',
+                    type: 'pie',
+                    radius: ['30%', '70%'],
+                    data: [
+                        { value: data.priorities.high, name: 'High' },
+                        { value: data.priorities.medium, name: 'Medium' },
+                        { value: data.priorities.low, name: 'Low' }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }]
+            };
+            
+            // Category Distribution Chart
+            const categoryOption = {
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'horizontal',
+                    bottom: '5%',
+                    padding: [20, 0, 0, 0]
+                },
+                series: [{
+                    name: 'Categories',
+                    type: 'pie',
+                    radius: ['30%', '70%'],
+                    data: data.categories.map(cat => ({
+                        value: cat.value,
+                        name: cat.name
+                    })),
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }]
+            };
+            
+            // Assignee Distribution Chart
+            const assigneeOption = {
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'horizontal',
+                    bottom: '5%',
+                    padding: [20, 0, 0, 0]
+                },
+                series: [{
+                    name: 'Assignees',
+                    type: 'pie',
+                    radius: ['30%', '70%'],
+                    data: data.assignees,
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }]
+            };
+            
+            statusChart.setOption(statusOption);
+            priorityChart.setOption(priorityOption);
+            categoryChart.setOption(categoryOption);
+            assigneeChart.setOption(assigneeOption);
+        }
+
+        // Calculate assignee distribution from todos
+        function calculateAssigneeDistribution(todos) {
+            const defaultAssignee = 'Neo';
+            const assigneeCounts = {};
+            
+            todos.forEach(todo => {
+                const assignee = todo.assignee || defaultAssignee;
+                assigneeCounts[assignee] = (assigneeCounts[assignee] || 0) + 1;
+            });
+            
+            return Object.entries(assigneeCounts).map(([name, value]) => ({
+                name,
+                value
+            }));
+        }
+
+        function updateStats(data) {
+            const statsDiv = document.getElementById('stats');
+            
+            statsDiv.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${data.total}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.pending}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.completed}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.priorities.high}</div>
+                    <div class="stat-label">High Priority</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.priorities.medium}</div>
+                    <div class="stat-label">Medium Priority</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.priorities.low}</div>
+                    <div class="stat-label">Low Priority</div>
+                </div>
+            `;
+        }
+
+        function updateTodos(todos) {
+            // Separate pending and completed todos
+            const pendingTodos = todos.filter(todo => !todo.completed);
+            const completedTodos = todos.filter(todo => todo.completed);
+            
+            // Sort pending todos by priority: high, medium, low
+            const priorityOrder = { 'high': 1, 'medium': 2, 'low': 3 };
+            pendingTodos.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+            
+            // Update pending todos section
+            const pendingTodosDiv = document.getElementById('pendingTodos');
+            pendingTodosDiv.innerHTML = '<h2>Pending Tasks</h2>';
+            
+            if (pendingTodos.length === 0) {
+                pendingTodosDiv.innerHTML += '<p>No pending tasks.</p>';
+            } else {
+                // Use the actual IDs from the data.json instead of incremental IDs
+                pendingTodos.forEach((todo) => {
+                    const todoClass = `todo-item priority-${todo.priority}`;
+                    const status = '○';
+                    
+                    const todoElement = document.createElement('div');
+                    todoElement.className = todoClass;
+                    todoElement.innerHTML = `
+                        <strong>${status} #${todo.id}</strong> 
+                        ${todo.text}
+                        ${todo.dueDate ? `<em>(Due: ${todo.dueDate})</em>` : ''}
+                        ${todo.category ? `<span>[${todo.category}]</span>` : ''}
+                        ${todo.assignee ? `<span style="color: #2196F3;">@${todo.assignee}</span>` : ''}
+                    `;
+                    
+                    pendingTodosDiv.appendChild(todoElement);
+                });
+            }
+            
+            // Update completed todos section
+            const completedListDiv = document.getElementById('completedList');
+            completedListDiv.innerHTML = '';
+            
+            if (completedTodos.length === 0) {
+                completedListDiv.innerHTML = '<p>No completed tasks.</p>';
+            } else {
+                // Use the actual IDs from the data.json instead of incremental IDs
+                completedTodos.forEach((todo) => {
+                    const todoClass = `todo-item priority-${todo.priority} completed`;
+                    const status = '✓';
+                    
+                    const todoElement = document.createElement('div');
+                    todoElement.className = todoClass;
+                    todoElement.innerHTML = `
+                        <strong>${status} #${todo.id}</strong> 
+                        ${todo.text}
+                        ${todo.dueDate ? `<em>(Due: ${todo.dueDate})</em>` : ''}
+                        ${todo.category ? `<span>[${todo.category}]</span>` : ''}
+                        ${todo.assignee ? `<span style="color: #2196F3;">@${todo.assignee}</span>` : ''}
+                    `;
+                    
+                    completedListDiv.appendChild(todoElement);
+                });
+            }
+        }
+
+        // Initialize charts and load data when page loads
+        window.onload = function() {
+            initCharts();
+            loadTodoData();
+        };
+        
+        // Refresh every 30 seconds
+        setInterval(loadTodoData, 30000);
+        
+        // Handle window resize to keep charts responsive
+        window.addEventListener('resize', function() {
+            if (statusChart) statusChart.resize();
+            if (priorityChart) priorityChart.resize();
+            if (categoryChart) categoryChart.resize();
+            if (assigneeChart) assigneeChart.resize();
+        });
+
+        // Toggle completed tasks visibility
+        function toggleCompleted() {
+            const list = document.getElementById('completedList');
+            const icon = document.getElementById('toggleIcon');
+            if (list.style.display === 'none') {
+                list.style.display = 'block';
+                icon.textContent = '▲';
+            } else {
+                list.style.display = 'none';
+                icon.textContent = '▼';
+            }
+        }
+    </script>
+</body>
+</html>
