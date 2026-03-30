@@ -307,6 +307,17 @@
       "category": "no category",
       "assignee": "Neo",
       "completedAt": null
+    },
+    {
+      "id": 1774847121063689,
+      "text": "Set up PAT for Isadora's own GitHub account",
+      "completed": false,
+      "createdAt": "2026-03-30T13:05:21.063693",
+      "priority": "medium",
+      "dueDate": null,
+      "category": "no category",
+      "assignee": "Neo",
+      "completedAt": null
     }
   ],
   "categories": [
