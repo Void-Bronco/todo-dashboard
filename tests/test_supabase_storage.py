@@ -162,6 +162,53 @@ class TestSupabaseStorageSave:
         storage.save(data)
 
 
+class TestSupabaseStorageAdd:
+    @patch('supabase.create_client')
+    def test_add_inserts_todo_without_id_for_db_generation(self, mock_create_client):
+        """Test that when adding a todo with id=None, the id is NOT sent to Supabase."""
+        mock_client = MagicMock()
+        mock_client.table.return_value.insert.return_value.execute.return_value = MagicMock(
+            data=[{'id': 123, 'text': 'New task', 'completed': False}]
+        )
+        mock_create_client.return_value = mock_client
+
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
+        todo = {'text': 'New task', 'completed': False, 'id': None}
+        result_id = storage.add(todo)
+
+        insert_call = mock_client.table.return_value.insert
+        insert_call.assert_called()
+        inserted_data = insert_call.call_args[0][0]
+        assert 'id' not in inserted_data, "id should not be sent to Supabase for new todo"
+        assert result_id == 123
+
+    @patch('supabase.create_client')
+    def test_add_always_strips_id_regardless_of_value(self, mock_create_client):
+        """Test that add() always strips the ID from the insert call, even for non-None IDs.
+        
+        This is important because todo.py pre-generates IDs using timestamps.
+        The add() method should always let Supabase generate the ID.
+        """
+        mock_client = MagicMock()
+        mock_client.table.return_value.insert.return_value.execute.return_value = MagicMock(
+            data=[{'id': 123, 'text': 'Task', 'completed': False}]
+        )
+        mock_create_client.return_value = mock_client
+
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
+        timestamp_id = 1774885161450947
+        todo = {'id': timestamp_id, 'text': 'Task', 'completed': False, 'priority': 'high'}
+        result_id = storage.add(todo)
+
+        insert_call = mock_client.table.return_value.insert
+        insert_call.assert_called()
+        inserted_data = insert_call.call_args[0][0]
+        assert 'id' not in inserted_data, "id should not be sent to Supabase even when provided"
+        assert inserted_data['text'] == 'Task'
+        assert inserted_data['priority'] == 'high'
+        assert result_id == 123
+
+
 class TestSupabaseStorageExists:
     @patch('supabase.create_client')
     def test_exists_returns_true_when_table_accessible(self, mock_create_client):

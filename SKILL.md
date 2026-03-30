@@ -28,7 +28,7 @@ This skill allows users to manage their personal todo lists with the following f
 
 **Important**: This skill requires the CLI to be run with the virtual environment Python:
 ```bash
-/home/neo/skills/todo-list/venv/bin/python todo.py <command>
+python todo.py <command>
 ```
 
 If  commands fail:

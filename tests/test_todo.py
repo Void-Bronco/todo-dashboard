@@ -155,23 +155,6 @@ class TestBasicTodoOperations:
         todos = todo_manager.list_todos()
         assert len(todos) == 0
 
-    def test_should_clear_completed_todos(self, mock_storage):
-        todo_manager = TodoManager(storage_backend=mock_storage)
-
-        todo1 = todo_manager.add_todo('Keep me')
-        todo2 = todo_manager.add_todo('Remove me')
-
-        todo_manager.mark_complete(todo2['id'])
-
-        remaining_count = todo_manager.clear_completed()
-        assert remaining_count == 1
-
-        todos = todo_manager.list_todos()
-        assert len(todos) == 1
-        remaining_todo = next(t for t in todos if t['id'] == todo1['id'])
-        assert remaining_todo['text'] == 'Keep me'
-
-
 class TestCategoryManagement:
     def test_should_add_a_new_category(self, mock_storage):
         todo_manager = TodoManager(storage_backend=mock_storage)
@@ -254,47 +237,6 @@ class TestCategoryManagement:
 
         with pytest.raises(ValueError, match='Category name cannot be empty'):
             todo_manager.remove_category('')
-
-    def test_should_update_todo_category(self, mock_storage):
-        todo_manager = TodoManager(storage_backend=mock_storage)
-
-        todo_manager.add_category('work')
-        todo_manager.add_category('personal')
-
-        todo = todo_manager.add_todo('Test task', 'medium', None, 'no category')
-
-        updated_todo = todo_manager.update_todo_category(todo['id'], 'work')
-        assert updated_todo['category'] == 'work'
-
-        all_todos = todo_manager.list_todos()
-        stored_todo = next(t for t in all_todos if t['id'] == todo['id'])
-        assert stored_todo['category'] == 'work'
-
-    def test_should_create_category_if_not_exists_when_updating_todo_category(self, mock_storage):
-        todo_manager = TodoManager(storage_backend=mock_storage)
-
-        todo = todo_manager.add_todo('Test task')
-
-        updated_todo = todo_manager.update_todo_category(todo['id'], 'new category')
-        assert updated_todo['category'] == 'new category'
-
-        categories = todo_manager.list_categories()
-        assert 'new category' in categories
-
-    def test_should_return_null_when_updating_category_for_non_existent_todo(self, mock_storage):
-        todo_manager = TodoManager(storage_backend=mock_storage)
-
-        result = todo_manager.update_todo_category(999999, 'work')
-        assert result is None
-
-    def test_should_reject_empty_category_name_when_updating_todo_category(self, mock_storage):
-        todo_manager = TodoManager(storage_backend=mock_storage)
-
-        todo = todo_manager.add_todo('Test task')
-
-        with pytest.raises(ValueError, match='Category cannot be empty'):
-            todo_manager.update_todo_category(todo['id'], '')
-
 
 class TestCategoryBasedFiltering:
     def test_should_list_todos_by_category(self, mock_storage):

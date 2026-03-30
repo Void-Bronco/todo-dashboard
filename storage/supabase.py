@@ -121,9 +121,7 @@ class SupabaseStorage(StorageBackend):
         client = self._get_client()
         todo_db = _map_todo_to_db(todo)
         
-        # Remove ID if None or not provided, let DB generate
-        if todo_db.get('id') is None:
-            todo_db = {k: v for k, v in todo_db.items() if k != 'id'}
+        todo_db = {k: v for k, v in todo_db.items() if k != 'id'}
         
         response = client.table(self.todos_table).insert(todo_db).execute()
         
