@@ -112,6 +112,40 @@ class TestBasicTodoOperations:
         todos = todo_manager.list_todos(list_='all')
         assert len(todos) == 2
 
+    def test_list_all_filter_shows_backlog_with_all_statuses(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        regular_pending = todo_manager.add_todo('Regular pending')
+        regular_completed = todo_manager.add_todo('Regular completed')
+        backlog_pending = todo_manager.add_todo('Backlog pending', 'backlog', None, 'no category')
+        backlog_completed = todo_manager.add_todo('Backlog completed', 'backlog', None, 'work')
+
+        todo_manager.mark_complete(regular_completed['id'])
+        todo_manager.mark_complete(backlog_completed['id'])
+
+        todos = todo_manager.list_todos('all', list_='all')
+        assert len(todos) == 4
+
+        todos = todo_manager.list_todos('pending', list_='all')
+        assert len(todos) == 2
+        pending_priorities = [t['priority'] for t in todos]
+        assert 'backlog' in pending_priorities
+
+        todos = todo_manager.list_todos('completed', list_='all')
+        assert len(todos) == 2
+        completed_priorities = [t['priority'] for t in todos]
+        assert 'backlog' in completed_priorities
+
+    def test_list_default_excludes_backlog_regardless_of_status(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        todo_manager.add_todo('Regular pending')
+        todo_manager.add_todo('Backlog pending', 'backlog', None, 'no category')
+
+        todos = todo_manager.list_todos('all', list_='default')
+        assert len(todos) == 1
+        assert todos[0]['priority'] != 'backlog'
+
     def test_list_with_filter_and_backlog(self, mock_storage):
         todo_manager = TodoManager(storage_backend=mock_storage)
 
@@ -907,3 +941,77 @@ class TestTodoItemModel:
         assert todos[0].assignee is None
         assert todos[0].completedAt is None
         assert todos[0].priority == 'medium'
+
+
+class TestListCommandEdgeCases:
+    """Edge case tests for list command combinations."""
+
+    def test_list_backlog_with_filter_pending(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        backlog_pending = todo_manager.add_todo('Backlog pending', 'backlog', None, 'no category')
+        backlog_completed = todo_manager.add_todo('Backlog completed', 'backlog', None, 'work')
+
+        todo_manager.mark_complete(backlog_completed['id'])
+
+        todos = todo_manager.list_todos('pending', list_='backlog')
+        assert len(todos) == 1
+        assert todos[0]['text'] == 'Backlog pending'
+        assert todos[0]['completed'] is False
+
+    def test_list_backlog_with_filter_completed(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        backlog_pending = todo_manager.add_todo('Backlog pending', 'backlog', None, 'no category')
+        backlog_completed = todo_manager.add_todo('Backlog completed', 'backlog', None, 'work')
+
+        todo_manager.mark_complete(backlog_completed['id'])
+
+        todos = todo_manager.list_todos('completed', list_='backlog')
+        assert len(todos) == 1
+        assert todos[0]['text'] == 'Backlog completed'
+        assert todos[0]['completed'] is True
+
+    def test_list_default_with_filter_all_shows_non_backlog(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        todo_manager.add_todo('Regular pending')
+        todo_manager.add_todo('Regular completed')
+        todo_manager.add_todo('Backlog pending', 'backlog', None, 'no category')
+        todo_manager.add_todo('Backlog completed', 'backlog', None, 'work')
+
+        regular_completed = todo_manager.list_todos()[1]
+        todo_manager.mark_complete(regular_completed['id'])
+
+        todos = todo_manager.list_todos('all', list_='default')
+        assert len(todos) == 2
+        assert all(t['priority'] != 'backlog' for t in todos)
+
+    def test_list_default_with_filter_all_excludes_backlog_completed(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        todo_manager.add_todo('Regular pending')
+        todo_manager.add_todo('Backlog pending', 'backlog', None, 'no category')
+
+        todos = todo_manager.list_todos('pending', list_='default')
+        assert len(todos) == 1
+        assert todos[0]['text'] == 'Regular pending'
+
+    def test_list_all_includes_backlog_regardless_of_category(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        todo_manager.add_todo('Task with category', 'backlog', None, 'work')
+        todo_manager.add_todo('Task no category', 'backlog', None, 'no category')
+
+        todos = todo_manager.list_todos('all', list_='all')
+        assert len(todos) == 2
+        assert all(t['priority'] == 'backlog' for t in todos)
+
+    def test_list_backlog_empty_when_no_backlog_items(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        todo_manager.add_todo('Regular task', 'high')
+        todo_manager.add_todo('Another task', 'medium')
+
+        todos = todo_manager.list_todos(list_='backlog')
+        assert len(todos) == 0

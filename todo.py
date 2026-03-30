@@ -513,6 +513,7 @@ Options:
                 i += 1
             elif args[i] == '--all':
                 filter_type = 'all'
+                list_filter = 'all'
                 i += 1
             elif args[i] == '--fields' and i + 1 < len(args):
                 fields = [f.strip() for f in args[i + 1].split(',')]
