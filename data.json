@@ -329,6 +329,17 @@
       "category": "no category",
       "assignee": "Neo",
       "completedAt": null
+    },
+    {
+      "id": 1774868799016766,
+      "text": "Final persist test",
+      "completed": false,
+      "createdAt": "2026-03-30T19:06:39.016769",
+      "priority": "low",
+      "dueDate": null,
+      "category": "personal",
+      "assignee": "Neo",
+      "completedAt": null
     }
   ],
   "categories": [
