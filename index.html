@@ -126,7 +126,7 @@
                 // Filter todos based on toggle for distribution charts
                 const todosForDistribution = includeCompleted ? fullData.todos : fullData.todos.filter(t => !t.completed);
                 
-                const isBacklog = (todo) => todo.backlog === true || todo.category === 'backlog';
+                const isBacklog = (todo) => todo.priority === 'backlog';
 
                 const pendingNonBacklog = fullData.todos.filter(t => !t.completed && !isBacklog(t));
                 const backlog = fullData.todos.filter(t => !t.completed && isBacklog(t));
@@ -141,11 +141,6 @@
                         high: todosForDistribution.filter(t => t.priority === 'high').length,
                         medium: todosForDistribution.filter(t => t.priority === 'medium').length,
                         low: todosForDistribution.filter(t => t.priority === 'low').length
-                    },
-                    backlogPriorities: {
-                        high: backlog.filter(t => t.priority === 'high').length,
-                        medium: backlog.filter(t => t.priority === 'medium').length,
-                        low: backlog.filter(t => t.priority === 'low').length
                     },
                     categories: fullData.categories.map(cat => ({
                         name: cat,
@@ -193,7 +188,7 @@
                 }]
             };
             
-            // Priority Distribution Chart (including backlog)
+            // Priority Distribution Chart
             const priorityOption = {
                 tooltip: {
                     trigger: 'item'
@@ -211,9 +206,7 @@
                         { value: data.priorities.high, name: 'High' },
                         { value: data.priorities.medium, name: 'Medium' },
                         { value: data.priorities.low, name: 'Low' },
-                        { value: data.backlogPriorities.high, name: 'Backlog High' },
-                        { value: data.backlogPriorities.medium, name: 'Backlog Medium' },
-                        { value: data.backlogPriorities.low, name: 'Backlog Low' }
+                        { value: data.backlog, name: 'Backlog' }
                     ],
                     emphasis: {
                         itemStyle: {
@@ -332,23 +325,11 @@
                     <div class="stat-value">${data.priorities.low}</div>
                     <div class="stat-label">Low Priority</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">${data.backlogPriorities.high}</div>
-                    <div class="stat-label">Backlog High</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${data.backlogPriorities.medium}</div>
-                    <div class="stat-label">Backlog Medium</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${data.backlogPriorities.low}</div>
-                    <div class="stat-label">Backlog Low</div>
-                </div>
             `;
         }
 
         function updateTodos(todos) {
-            const isBacklog = (todo) => todo.backlog === true || todo.category === 'backlog';
+            const isBacklog = (todo) => todo.priority === 'backlog';
 
             const pendingTodos = todos.filter(todo => !todo.completed && !isBacklog(todo));
             const backlogTodos = todos.filter(todo => !todo.completed && isBacklog(todo));
