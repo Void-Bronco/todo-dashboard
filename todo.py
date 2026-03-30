@@ -374,7 +374,7 @@ def main():
 
 Usage:
   todo add [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] <item text>
-  todo list [--filter all|pending|completed] [--assignee NAME]
+  todo list [--filter all|pending|completed] [--list default|backlog|all] [--category NAME] [--assignee NAME] [--json|--text]
   todo update <id> [--text "text"] [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--completed|--pending] [--id NEW_ID]
   todo complete <id>
   todo remove <id>
@@ -745,7 +745,7 @@ Examples:
 
 Usage:
   todo add [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] <item text>
-  todo list [--filter all|pending|completed] [--assignee NAME]
+  todo list [--filter all|pending|completed] [--list default|backlog|all] [--category NAME] [--assignee NAME] [--json|--text]
   todo update <id> [--text "text"] [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--completed|--pending] [--id NEW_ID]
   todo complete <id>
   todo remove <id>
