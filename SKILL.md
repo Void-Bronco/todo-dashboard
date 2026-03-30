@@ -39,9 +39,9 @@ If  commands fail:
 
 When the user wants to manage their todo list, execute the appropriate command using the exec tool:
 
-- Use `exec command="python {baseDir}/todo.py add [--priority high|medium|low] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] <item text>"` to add a new item to the todo list
+- Use `exec command="python {baseDir}/todo.py add [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] <item text>"` to add a new item to the todo list
 - Use `exec command="python {baseDir}/todo.py list [--filter all|pending|completed] [--assignee NAME] [--list default|backlog|all] [--fields FIELD1,FIELD2] [--json|--text]"` to show pending items (default: JSON output)
-- Use `exec command="python {baseDir}/todo.py update <id> [--text \"text\"] [--priority high|medium|low] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--completed|--pending]"` to update a todo item
+- Use `exec command="python {baseDir}/todo.py update <id> [--text \"text\"] [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--completed|--pending]"` to update a todo item
 - Use `exec command="python {baseDir}/todo.py complete <id>"` to mark an item as completed
 - Use `exec command="python {baseDir}/todo.py remove <id>"` to remove an item completely
 
@@ -53,7 +53,7 @@ When the user wants to manage their todo list, execute the appropriate command u
 
 ## List Command Defaults
 
-By default, `list` shows **pending items only** in **JSON format**, excluding items in the "backlog" category. Use flags to change:
+By default, `list` shows **pending items only** in **JSON format**, excluding items with `priority: "backlog"`. Use flags to change:
 
 ```bash
 todo list                    # Show pending items in JSON (default, excludes backlog)

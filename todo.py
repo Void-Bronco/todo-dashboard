@@ -200,9 +200,9 @@ class TodoManager:
         filtered_todos = list(self.todos)
 
         if list_ == 'default':
-            filtered_todos = [t for t in filtered_todos if t.category.lower() != 'backlog']
+            filtered_todos = [t for t in filtered_todos if t.priority.lower() != 'backlog']
         elif list_ == 'backlog':
-            filtered_todos = [t for t in filtered_todos if t.category.lower() == 'backlog']
+            filtered_todos = [t for t in filtered_todos if t.priority.lower() == 'backlog']
         elif list_ == 'all':
             pass
 

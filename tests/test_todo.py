@@ -86,7 +86,7 @@ class TestBasicTodoOperations:
         todo_manager = TodoManager(storage_backend=mock_storage)
 
         todo_manager.add_todo('Regular task')
-        todo_manager.add_todo('Backlog task', 'medium', None, 'backlog')
+        todo_manager.add_todo('Backlog task', 'backlog', None, 'no category')
 
         todos = todo_manager.list_todos(list_='default')
         assert len(todos) == 1
@@ -96,18 +96,18 @@ class TestBasicTodoOperations:
         todo_manager = TodoManager(storage_backend=mock_storage)
 
         todo_manager.add_todo('Regular task')
-        todo_manager.add_todo('Backlog task 1', 'medium', None, 'backlog')
-        todo_manager.add_todo('Backlog task 2', 'low', None, 'backlog')
+        todo_manager.add_todo('Backlog task 1', 'backlog', None, 'no category')
+        todo_manager.add_todo('Backlog task 2', 'backlog', None, 'work')
 
         todos = todo_manager.list_todos(list_='backlog')
         assert len(todos) == 2
-        assert all(t['category'] == 'backlog' for t in todos)
+        assert all(t['priority'] == 'backlog' for t in todos)
 
     def test_list_all_should_include_backlog_items(self, mock_storage):
         todo_manager = TodoManager(storage_backend=mock_storage)
 
         todo_manager.add_todo('Regular task')
-        todo_manager.add_todo('Backlog task', 'medium', None, 'backlog')
+        todo_manager.add_todo('Backlog task', 'backlog', None, 'no category')
 
         todos = todo_manager.list_todos(list_='all')
         assert len(todos) == 2
@@ -117,8 +117,8 @@ class TestBasicTodoOperations:
 
         regular_pending = todo_manager.add_todo('Pending regular')
         regular_completed = todo_manager.add_todo('Completed regular')
-        backlog_pending = todo_manager.add_todo('Backlog pending', 'medium', None, 'backlog')
-        backlog_completed = todo_manager.add_todo('Backlog completed', 'low', None, 'backlog')
+        backlog_pending = todo_manager.add_todo('Backlog pending', 'backlog', None, 'no category')
+        backlog_completed = todo_manager.add_todo('Backlog completed', 'backlog', None, 'work')
 
         todo_manager.mark_complete(regular_completed['id'])
         todo_manager.mark_complete(backlog_completed['id'])
@@ -127,9 +127,9 @@ class TestBasicTodoOperations:
         assert len(default_pending) == 1
         assert default_pending[0]['text'] == 'Pending regular'
 
-        backlog_pending = todo_manager.list_todos('pending', list_='backlog')
-        assert len(backlog_pending) == 1
-        assert backlog_pending[0]['text'] == 'Backlog pending'
+        backlog_items = todo_manager.list_todos('pending', list_='backlog')
+        assert len(backlog_items) == 1
+        assert backlog_items[0]['text'] == 'Backlog pending'
 
     def test_should_mark_a_todo_as_complete(self, mock_storage):
         todo_manager = TodoManager(storage_backend=mock_storage)

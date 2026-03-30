@@ -6,8 +6,7 @@ A skill for managing personal todo lists with add, remove, complete, and view fu
 
 - Add, update, complete, and remove todo items
 - Organize with categories and assignees
-- **Backlog** - Hide items from default view
-- Priority levels (high, medium, low)
+- Priority levels (high, medium, low, backlog)
 - Due dates
 - Multiple storage backends (local, GitHub, Supabase)
 
@@ -103,13 +102,13 @@ The data file is cloned/pushed on each operation. The clone directory is reused 
 
 ## Backlog
 
-Items with category "backlog" are hidden from the default list view:
+Items with `priority: "backlog"` are hidden from the default list view:
 
 ```bash
-# Add item to backlog
-todo add "Fix this later" --category backlog
+# Add item to backlog (low priority, hidden from default view)
+todo add "Fix this later" --priority backlog
 
-# View default list (excludes backlog)
+# View default list (excludes backlog priority)
 todo list
 
 # View only backlog items
