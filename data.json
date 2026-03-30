@@ -107,7 +107,7 @@
       "priority": "medium",
       "dueDate": null,
       "category": "no category",
-      "assignee": "isadora",
+      "assignee": null,
       "completedAt": null
     },
     {
