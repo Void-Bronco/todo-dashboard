@@ -2,6 +2,15 @@
 
 A skill for managing personal todo lists with add, remove, complete, and view functionality.
 
+## Features
+
+- Add, update, complete, and remove todo items
+- Organize with categories and assignees
+- **Backlog** - Hide items from default view
+- Priority levels (high, medium, low)
+- Due dates
+- Multiple storage backends (local, GitHub, Supabase)
+
 ## Setup
 
 1. Copy `config.yml.sample` to `config.yml`
@@ -42,6 +51,20 @@ github:
 
 **GitHub Authentication**: Uses SSH keys configured on the system.
 
+#### Supabase Storage
+
+```yaml
+storage:
+  type: supabase
+
+supabase:
+  url: https://your-project.supabase.co
+  publishable_key: your-publishable-key
+  secret_key: your-secret-key
+```
+
+**Note**: Run with venv Python: `/home/neo/skills/todo-list/venv/bin/python todo.py <command>`
+
 ## Data Storage
 
 ### Local Storage
@@ -77,6 +100,24 @@ When using GitHub storage, the data file is committed to a Git repository, enabl
 - Collaboration through GitHub
 
 The data file is cloned/pushed on each operation. The clone directory is reused for efficiency.
+
+## Backlog
+
+Items with category "backlog" are hidden from the default list view:
+
+```bash
+# Add item to backlog
+todo add "Fix this later" --category backlog
+
+# View default list (excludes backlog)
+todo list
+
+# View only backlog items
+todo list --list backlog
+
+# View all items (includes backlog)
+todo list --list all
+```
 
 ## Installation
 

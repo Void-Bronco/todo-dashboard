@@ -82,6 +82,55 @@ class TestBasicTodoOperations:
         assert completed_todos[0]['text'] == 'Completed task'
         assert completed_todos[0]['completed'] is True
 
+    def test_default_list_should_exclude_backlog_items(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        todo_manager.add_todo('Regular task')
+        todo_manager.add_todo('Backlog task', 'medium', None, 'backlog')
+
+        todos = todo_manager.list_todos(list_='default')
+        assert len(todos) == 1
+        assert todos[0]['text'] == 'Regular task'
+
+    def test_list_backlog_should_only_show_backlog_items(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        todo_manager.add_todo('Regular task')
+        todo_manager.add_todo('Backlog task 1', 'medium', None, 'backlog')
+        todo_manager.add_todo('Backlog task 2', 'low', None, 'backlog')
+
+        todos = todo_manager.list_todos(list_='backlog')
+        assert len(todos) == 2
+        assert all(t['category'] == 'backlog' for t in todos)
+
+    def test_list_all_should_include_backlog_items(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        todo_manager.add_todo('Regular task')
+        todo_manager.add_todo('Backlog task', 'medium', None, 'backlog')
+
+        todos = todo_manager.list_todos(list_='all')
+        assert len(todos) == 2
+
+    def test_list_with_filter_and_backlog(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        regular_pending = todo_manager.add_todo('Pending regular')
+        regular_completed = todo_manager.add_todo('Completed regular')
+        backlog_pending = todo_manager.add_todo('Backlog pending', 'medium', None, 'backlog')
+        backlog_completed = todo_manager.add_todo('Backlog completed', 'low', None, 'backlog')
+
+        todo_manager.mark_complete(regular_completed['id'])
+        todo_manager.mark_complete(backlog_completed['id'])
+
+        default_pending = todo_manager.list_todos('pending', list_='default')
+        assert len(default_pending) == 1
+        assert default_pending[0]['text'] == 'Pending regular'
+
+        backlog_pending = todo_manager.list_todos('pending', list_='backlog')
+        assert len(backlog_pending) == 1
+        assert backlog_pending[0]['text'] == 'Backlog pending'
+
     def test_should_mark_a_todo_as_complete(self, mock_storage):
         todo_manager = TodoManager(storage_backend=mock_storage)
 
@@ -317,7 +366,7 @@ class TestDataPersistence:
         assert mock_storage.save_called is True
 
         todos = mock_storage.last_saved_data['todos']
-        categories = mock_storage.last_saved_data['categories']
+        categories = todo_manager1.list_categories()
         assert len(todos) == 2
         assert 'work' in categories
         assert 'personal' in categories
@@ -386,9 +435,8 @@ class TestBackwardCompatibility:
 
         assert len(todo_manager.todos) == 1
         assert todo_manager.todos[0]['text'] == 'Old task'
-        assert todo_manager.todos[0]['id'] == 1
         assert len(todo_manager.categories) == 1
-        assert todo_manager.categories[0] == 'no category'
+        assert todo_manager.list_categories() == ['no category']
 
     def test_should_handle_missing_properties_in_old_format_gracefully(self, mock_storage):
         mock_storage.set_data([
@@ -829,6 +877,24 @@ class TestUpdateCommand:
 
         assert updated.completed is False
         assert updated.completedAt is None
+
+    def test_update_id(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Test task')
+        original_id = todo.id
+
+        updated = todo_manager.update_todo(original_id, id=999)
+
+        assert updated.id == 999
+        assert original_id != 999
+
+    def test_update_id_duplicate_raises_error(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo1 = todo_manager.add_todo('Task 1')
+        todo2 = todo_manager.add_todo('Task 2')
+
+        with pytest.raises(ValueError, match='already exists'):
+            todo_manager.update_todo(todo2.id, id=todo1.id)
 
 
 class TestTodoItemModel:

@@ -7,17 +7,17 @@ class TestSupabaseStorageConfiguration:
     def test_default_initialization(self):
         storage = SupabaseStorage(
             url='https://test.supabase.co',
-            anon_key='test-key'
+            secret_key='test-key'
         )
         assert storage.url == 'https://test.supabase.co'
-        assert storage.anon_key == 'test-key'
+        assert storage.secret_key == 'test-key'
         assert storage.todos_table == 'todos'
         assert storage.categories_table == 'categories'
 
     def test_custom_table_names(self):
         storage = SupabaseStorage(
             url='https://test.supabase.co',
-            anon_key='test-key',
+            secret_key='test-key',
             todos_table='my_todos',
             categories_table='my_categories'
         )
@@ -27,7 +27,7 @@ class TestSupabaseStorageConfiguration:
     def test_client_lazy_initialization(self):
         storage = SupabaseStorage(
             url='https://test.supabase.co',
-            anon_key='test-key'
+            secret_key='test-key'
         )
         assert storage._client is None
         storage._get_client()
@@ -44,7 +44,7 @@ class TestSupabaseStorageLoad:
         ]
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         result = storage.load()
 
         assert 'todos' in result
@@ -61,7 +61,7 @@ class TestSupabaseStorageLoad:
         ]
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         result = storage.load()
 
         assert result['todos'] == []
@@ -76,7 +76,7 @@ class TestSupabaseStorageLoad:
         ]
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         result = storage.load()
 
         assert result['categories'] == [{'name': 'no category'}]
@@ -85,7 +85,7 @@ class TestSupabaseStorageLoad:
     def test_load_network_error_returns_defaults(self, mock_create_client):
         mock_create_client.side_effect = Exception('Network error')
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         result = storage.load()
 
         assert result == {'todos': [], 'categories': [{'name': 'no category'}]}
@@ -96,7 +96,7 @@ class TestSupabaseStorageLoad:
         mock_client.table.return_value.select.return_value.execute.side_effect = Exception('table not found')
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         result = storage.load()
 
         assert result == {'todos': [], 'categories': [{'name': 'no category'}]}
@@ -104,12 +104,12 @@ class TestSupabaseStorageLoad:
 
 class TestSupabaseStorageSave:
     @patch('supabase.create_client')
-    def test_save_clears_and_inserts_todos(self, mock_create_client):
+    def test_save_upserts_todos(self, mock_create_client):
         mock_client = MagicMock()
         mock_client.table.return_value.select.return_value.execute.return_value = MagicMock(data=[])
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         data = {
             'todos': [
                 {'id': 1, 'text': 'New task', 'completed': False, 'priority': 'medium', 'dueDate': None, 'category': 'work', 'createdAt': '2024-01-01'}
@@ -118,29 +118,28 @@ class TestSupabaseStorageSave:
         }
         storage.save(data)
 
-        assert mock_client.table.return_value.delete.return_value.neq.return_value.execute.called
-        assert mock_client.table.return_value.insert.return_value.execute.called
+        assert mock_client.table.return_value.upsert.return_value.execute.called
 
     @patch('supabase.create_client')
-    def test_save_skips_todo_insert_when_empty(self, mock_create_client):
+    def test_save_skips_todo_upsert_when_empty(self, mock_create_client):
         mock_client = MagicMock()
         mock_client.table.return_value.select.return_value.execute.return_value = MagicMock(data=[])
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         data = {'todos': [], 'categories': []}
         storage.save(data)
 
-        insert_calls = [c for c in mock_client.table.return_value.insert.return_value.execute.call_args_list]
-        assert len(insert_calls) == 0
+        upsert_calls = [c for c in mock_client.table.return_value.upsert.return_value.execute.call_args_list]
+        assert len(upsert_calls) == 0
 
     @patch('supabase.create_client')
     def test_save_network_error_raises(self, mock_create_client):
         mock_client = MagicMock()
-        mock_client.table.return_value.delete.return_value.neq.return_value.execute.side_effect = Exception('Network error')
+        mock_client.table.return_value.upsert.return_value.execute.side_effect = Exception('Network error')
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         data = {'todos': [{'id': 1}], 'categories': []}
 
         with pytest.raises(Exception, match='Network error'):
@@ -155,7 +154,7 @@ class TestSupabaseStorageSave:
         ]
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         data = {
             'todos': [],
             'categories': [{'name': 'work'}, {'name': 'home'}, {'name': 'new'}]
@@ -170,7 +169,7 @@ class TestSupabaseStorageExists:
         mock_client.table.return_value.select.return_value.limit.return_value.execute.return_value = MagicMock(data=[{'id': 1}])
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         assert storage.exists() is True
 
     @patch('supabase.create_client')
@@ -179,7 +178,7 @@ class TestSupabaseStorageExists:
         mock_client.table.return_value.select.return_value.limit.return_value.execute.side_effect = Exception('Connection failed')
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         assert storage.exists() is False
 
     @patch('supabase.create_client')
@@ -188,7 +187,7 @@ class TestSupabaseStorageExists:
         mock_client.table.return_value.select.return_value.limit.return_value.execute.side_effect = Exception('Invalid API key')
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='invalid-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='invalid-key')
         assert storage.exists() is False
 
 
@@ -202,7 +201,7 @@ class TestSupabaseStorageEdgeCases:
         ]
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         result = storage.load()
 
         assert result == {'todos': [], 'categories': [{'name': 'no category'}]}
@@ -210,15 +209,13 @@ class TestSupabaseStorageEdgeCases:
     @patch('supabase.create_client')
     def test_save_handles_concurrent_modification(self, mock_create_client):
         mock_client = MagicMock()
-        mock_client.table.return_value.delete.return_value.neq.return_value.execute.side_effect = [
-            Exception('Conflict: row modified by another request')
-        ]
+        mock_client.table.return_value.upsert.return_value.execute.side_effect = Exception('Conflict: row modified by another request')
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
 
         with pytest.raises(Exception):
-            storage.save({'todos': [], 'categories': []})
+            storage.save({'todos': [{'id': 1, 'text': 'Task'}], 'categories': []})
 
     @patch('supabase.create_client')
     def test_save_empty_categories_list(self, mock_create_client):
@@ -229,11 +226,11 @@ class TestSupabaseStorageEdgeCases:
         ]
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         data = {'todos': [{'id': 1, 'text': 'Task'}], 'categories': []}
         storage.save(data)
 
-        assert mock_client.table.return_value.insert.return_value.execute.called
+        assert mock_client.table.return_value.upsert.return_value.execute.called
 
     @patch('supabase.create_client')
     def test_load_with_string_categories(self, mock_create_client):
@@ -244,7 +241,7 @@ class TestSupabaseStorageEdgeCases:
         ]
         mock_create_client.return_value = mock_client
 
-        storage = SupabaseStorage(url='https://test.supabase.co', anon_key='test-key')
+        storage = SupabaseStorage(url='https://test.supabase.co', secret_key='test-key')
         result = storage.load()
 
         assert len(result['categories']) == 2
@@ -313,17 +310,17 @@ class TestSupabaseStorageFactory:
     def test_factory_creates_supabase_storage(self):
         from storage import get_storage
 
-        storage = get_storage('supabase', url='https://test.supabase.co', anon_key='test-key')
+        storage = get_storage('supabase', url='https://test.supabase.co', secret_key='test-key')
 
         assert isinstance(storage, SupabaseStorage)
         assert storage.url == 'https://test.supabase.co'
-        assert storage.anon_key == 'test-key'
+        assert storage.secret_key == 'test-key'
 
     def test_factory_raises_for_unknown_type(self):
         from storage import get_storage
 
         with pytest.raises(ValueError, match='Unknown storage type'):
-            get_storage('unknown', url='https://test.supabase.co', anon_key='test-key')
+            get_storage('unknown', url='https://test.supabase.co', secret_key='test-key')
 
 
 import json
