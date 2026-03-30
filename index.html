@@ -49,6 +49,12 @@
         <h2>Pending Tasks</h2>
         <!-- Pending todo items will be populated here -->
     </div>
+    <div class="todos" id="backlogTodos">
+        <h2 style="cursor: pointer;" onclick="toggleBacklog()">Backlog Tasks <span id="backlogToggleIcon">▼</span></h2>
+        <div id="backlogList" style="display: none;">
+            <!-- Backlog todo items will be populated here -->
+        </div>
+    </div>
     <div class="todos" id="completedTodos">
         <h2 style="cursor: pointer;" onclick="toggleCompleted()">Completed Tasks <span id="toggleIcon">▼</span></h2>
         <div id="completedList" style="display: none;">
@@ -120,15 +126,26 @@
                 // Filter todos based on toggle for distribution charts
                 const todosForDistribution = includeCompleted ? fullData.todos : fullData.todos.filter(t => !t.completed);
                 
+                const isBacklog = (todo) => todo.backlog === true || todo.category === 'backlog';
+
+                const pendingNonBacklog = fullData.todos.filter(t => !t.completed && !isBacklog(t));
+                const backlog = fullData.todos.filter(t => !t.completed && isBacklog(t));
+
                 // Calculate derived data from the todos array
                 const data = {
                     total: fullData.todos.length,
-                    pending: fullData.todos.filter(t => !t.completed).length,
+                    pending: pendingNonBacklog.length,
+                    backlog: backlog.length,
                     completed: fullData.todos.filter(t => t.completed).length,
                     priorities: {
                         high: todosForDistribution.filter(t => t.priority === 'high').length,
                         medium: todosForDistribution.filter(t => t.priority === 'medium').length,
                         low: todosForDistribution.filter(t => t.priority === 'low').length
+                    },
+                    backlogPriorities: {
+                        high: backlog.filter(t => t.priority === 'high').length,
+                        medium: backlog.filter(t => t.priority === 'medium').length,
+                        low: backlog.filter(t => t.priority === 'low').length
                     },
                     categories: fullData.categories.map(cat => ({
                         name: cat,
@@ -176,7 +193,7 @@
                 }]
             };
             
-            // Priority Distribution Chart
+            // Priority Distribution Chart (including backlog)
             const priorityOption = {
                 tooltip: {
                     trigger: 'item'
@@ -193,7 +210,10 @@
                     data: [
                         { value: data.priorities.high, name: 'High' },
                         { value: data.priorities.medium, name: 'Medium' },
-                        { value: data.priorities.low, name: 'Low' }
+                        { value: data.priorities.low, name: 'Low' },
+                        { value: data.backlogPriorities.high, name: 'Backlog High' },
+                        { value: data.backlogPriorities.medium, name: 'Backlog Medium' },
+                        { value: data.backlogPriorities.low, name: 'Backlog Low' }
                     ],
                     emphasis: {
                         itemStyle: {
@@ -293,6 +313,10 @@
                     <div class="stat-label">Pending</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-value">${data.backlog}</div>
+                    <div class="stat-label">Backlog</div>
+                </div>
+                <div class="stat-card">
                     <div class="stat-value">${data.completed}</div>
                     <div class="stat-label">Completed</div>
                 </div>
@@ -308,17 +332,32 @@
                     <div class="stat-value">${data.priorities.low}</div>
                     <div class="stat-label">Low Priority</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.backlogPriorities.high}</div>
+                    <div class="stat-label">Backlog High</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.backlogPriorities.medium}</div>
+                    <div class="stat-label">Backlog Medium</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.backlogPriorities.low}</div>
+                    <div class="stat-label">Backlog Low</div>
+                </div>
             `;
         }
 
         function updateTodos(todos) {
-            // Separate pending and completed todos
-            const pendingTodos = todos.filter(todo => !todo.completed);
+            const isBacklog = (todo) => todo.backlog === true || todo.category === 'backlog';
+
+            const pendingTodos = todos.filter(todo => !todo.completed && !isBacklog(todo));
+            const backlogTodos = todos.filter(todo => !todo.completed && isBacklog(todo));
             const completedTodos = todos.filter(todo => todo.completed);
             
             // Sort pending todos by priority: high, medium, low
             const priorityOrder = { 'high': 1, 'medium': 2, 'low': 3 };
             pendingTodos.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+            backlogTodos.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
             
             // Update pending todos section
             const pendingTodosDiv = document.getElementById('pendingTodos');
@@ -327,7 +366,6 @@
             if (pendingTodos.length === 0) {
                 pendingTodosDiv.innerHTML += '<p>No pending tasks.</p>';
             } else {
-                // Use the actual IDs from the data.json instead of incremental IDs
                 pendingTodos.forEach((todo) => {
                     const todoClass = `todo-item priority-${todo.priority}`;
                     const status = '○';
@@ -346,6 +384,31 @@
                 });
             }
             
+            // Update backlog todos section
+            const backlogListDiv = document.getElementById('backlogList');
+            backlogListDiv.innerHTML = '';
+            
+            if (backlogTodos.length === 0) {
+                backlogListDiv.innerHTML = '<p>No backlog tasks.</p>';
+            } else {
+                backlogTodos.forEach((todo) => {
+                    const todoClass = `todo-item priority-${todo.priority}`;
+                    const status = '○';
+                    
+                    const todoElement = document.createElement('div');
+                    todoElement.className = todoClass;
+                    todoElement.innerHTML = `
+                        <strong>${status} #${todo.id}</strong> 
+                        ${todo.text}
+                        ${todo.dueDate ? `<em>(Due: ${todo.dueDate})</em>` : ''}
+                        ${todo.category ? `<span>[${todo.category}]</span>` : ''}
+                        ${todo.assignee ? `<span style="color: #2196F3;">@${todo.assignee}</span>` : ''}
+                    `;
+                    
+                    backlogListDiv.appendChild(todoElement);
+                });
+            }
+            
             // Update completed todos section
             const completedListDiv = document.getElementById('completedList');
             completedListDiv.innerHTML = '';
@@ -353,7 +416,6 @@
             if (completedTodos.length === 0) {
                 completedListDiv.innerHTML = '<p>No completed tasks.</p>';
             } else {
-                // Use the actual IDs from the data.json instead of incremental IDs
                 completedTodos.forEach((todo) => {
                     const todoClass = `todo-item priority-${todo.priority} completed`;
                     const status = '✓';
@@ -394,6 +456,19 @@
         function toggleCompleted() {
             const list = document.getElementById('completedList');
             const icon = document.getElementById('toggleIcon');
+            if (list.style.display === 'none') {
+                list.style.display = 'block';
+                icon.textContent = '▲';
+            } else {
+                list.style.display = 'none';
+                icon.textContent = '▼';
+            }
+        }
+
+        // Toggle backlog tasks visibility
+        function toggleBacklog() {
+            const list = document.getElementById('backlogList');
+            const icon = document.getElementById('backlogToggleIcon');
             if (list.style.display === 'none') {
                 list.style.display = 'block';
                 icon.textContent = '▲';
