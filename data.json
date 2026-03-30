@@ -258,7 +258,7 @@
       "text": "repair safe",
       "completed": false,
       "createdAt": "2026-02-11T09:00:24.160Z",
-      "priority": "medium",
+      "priority": "low",
       "dueDate": null,
       "category": "personal",
       "assignee": "Neo",
