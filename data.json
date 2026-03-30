@@ -107,7 +107,7 @@
       "priority": "medium",
       "dueDate": null,
       "category": "no category",
-      "assignee": null,
+      "assignee": "isadora",
       "completedAt": null
     },
     {
@@ -298,10 +298,10 @@
       "completedAt": "2026-03-29T23:37:05.969676"
     },
     {
-      "id": 1774847104066400,
-      "text": "Set up PAT for Isadora's own GitHub account",
+      "id": 1774868338498280,
+      "text": "Integrate webclient with Supabase",
       "completed": false,
-      "createdAt": "2026-03-30T13:05:04.066405",
+      "createdAt": "2026-03-30T18:58:58.498284",
       "priority": "medium",
       "dueDate": null,
       "category": "no category",
