@@ -43,6 +43,14 @@ class TodoManager:
                 commit_message=cfg.storage.github.commit_message,
                 clone_dir=cfg.storage.github.clone_dir
             )
+        elif cfg.storage.type == 'supabase':
+            return storage.get_storage(
+                'supabase',
+                url=cfg.storage.supabase.url,
+                anon_key=cfg.storage.supabase.anon_key,
+                todos_table=cfg.storage.supabase.todos_table,
+                categories_table=cfg.storage.supabase.categories_table
+            )
         else:
             raise ValueError(f'Unknown storage type: {cfg.storage.type}')
 

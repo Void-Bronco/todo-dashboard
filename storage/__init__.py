@@ -16,8 +16,16 @@ def get_storage(storage_type: str, **kwargs) -> StorageBackend:
             commit_message=kwargs.get('commit_message', 'Update todos {timestamp}'),
             clone_dir=kwargs.get('clone_dir')
         )
+    elif storage_type == 'supabase':
+        from .supabase import SupabaseStorage
+        return SupabaseStorage(
+            url=kwargs.get('url', ''),
+            anon_key=kwargs.get('anon_key', ''),
+            todos_table=kwargs.get('todos_table', 'todos'),
+            categories_table=kwargs.get('categories_table', 'categories')
+        )
     else:
         raise ValueError(f'Unknown storage type: {storage_type}')
 
 
-__all__ = ['StorageBackend', 'LocalStorage', 'GitHubStorage', 'get_storage']
+__all__ = ['StorageBackend', 'LocalStorage', 'GitHubStorage', 'SupabaseStorage', 'get_storage']

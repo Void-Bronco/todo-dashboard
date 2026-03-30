@@ -21,10 +21,19 @@ class GitHubConfig:
 
 
 @dataclass
+class SupabaseConfig:
+    url: str = ''
+    anon_key: str = ''
+    todos_table: str = 'todos'
+    categories_table: str = 'categories'
+
+
+@dataclass
 class StorageConfig:
     type: str = 'local'
     local: Optional[LocalConfig] = None
     github: Optional[GitHubConfig] = None
+    supabase: Optional[SupabaseConfig] = None
 
 
 class Config:
@@ -81,8 +90,16 @@ class Config:
                 commit_message=github_data.get('commit_message', 'Update todos {timestamp}'),
                 clone_dir=github_data.get('clone_dir')
             )
+        elif storage_type == 'supabase':
+            supabase_data = storage_data.get('supabase', {})
+            self.storage.supabase = SupabaseConfig(
+                url=supabase_data.get('url', ''),
+                anon_key=supabase_data.get('anon_key', ''),
+                todos_table=supabase_data.get('todos_table', 'todos'),
+                categories_table=supabase_data.get('categories_table', 'categories')
+            )
         else:
-            raise ValueError(f'Unknown storage type: {storage_type}. Must be "local" or "github"')
+            raise ValueError(f'Unknown storage type: {storage_type}. Must be "local", "github", or "supabase"')
 
     def _load_defaults(self):
         self.storage = StorageConfig(
@@ -94,8 +111,8 @@ class Config:
         if not self.storage:
             raise ValueError('Storage configuration is not defined. Please create a config.yml file.')
 
-        if self.storage.type not in ('local', 'github'):
-            raise ValueError(f'Storage type must be "local" or "github", got: {self.storage.type}')
+        if self.storage.type not in ('local', 'github', 'supabase'):
+            raise ValueError(f'Storage type must be "local", "github", or "supabase", got: {self.storage.type}')
 
         if self.storage.type == 'local':
             if not self.storage.local:
@@ -106,3 +123,11 @@ class Config:
                 raise ValueError('GitHub storage configuration is missing')
             if not self.storage.github.repo_url:
                 raise ValueError('GitHub repo_url is required')
+
+        elif self.storage.type == 'supabase':
+            if not self.storage.supabase:
+                raise ValueError('Supabase storage configuration is missing')
+            if not self.storage.supabase.url:
+                raise ValueError('Supabase url is required')
+            if not self.storage.supabase.anon_key:
+                raise ValueError('Supabase anon_key is required')
