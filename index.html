@@ -203,10 +203,10 @@
                     type: 'pie',
                     radius: ['30%', '70%'],
                     data: [
-                        { value: data.priorities.high, name: 'High' },
-                        { value: data.priorities.medium, name: 'Medium' },
-                        { value: data.priorities.low, name: 'Low' },
-                        { value: data.backlog, name: 'Backlog' }
+                        { value: data.priorities.high, name: 'High', itemStyle: { color: '#e74c3c' } },
+                        { value: data.priorities.medium, name: 'Medium', itemStyle: { color: '#f1c40f' } },
+                        { value: data.priorities.low, name: 'Low', itemStyle: { color: '#27ae60' } },
+                        { value: data.backlog, name: 'Backlog', itemStyle: { color: '#95a5a6' } }
                     ],
                     emphasis: {
                         itemStyle: {
