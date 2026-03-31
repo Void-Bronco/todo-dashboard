@@ -35,11 +35,59 @@
         #refreshBtn:hover {
             background-color: #45a049;
         }
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: #ddd;
+            --stat-card-bg: #ffffff;
+            --chart-bg: #ffffff;
+        }
+        .dark-theme {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #404060;
+            --stat-card-bg: #16213e;
+            --chart-bg: #16213e;
+        }
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .stat-card, .chart-container, .todo-item {
+            background-color: var(--stat-card-bg);
+            border-color: var(--border-color);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .stat-value { color: var(--text-primary); }
+        .stat-label { color: var(--text-secondary); }
+        h1, h2, h3 { color: var(--text-primary); }
+        #themeBtn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+        #themeBtn:hover {
+            background-color: var(--bg-secondary);
+        }
+        #controls-bottom label {
+            color: var(--text-secondary);
+        }
     </style>
 </head>
 <body>
     <h1>Todo Dashboard</h1>
     <div style="text-align: right; margin-top: -40px;">
+        <button id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
         <button id="refreshBtn" onclick="loadTodoData()" title="Refresh data">🔄 Refresh</button>
     </div>
     <div class="stats" id="stats">
@@ -92,6 +140,47 @@
 
         // Global chart variables
         let statusChart, priorityChart, categoryChart, assigneeChart;
+        let isDarkTheme = false;
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                setTheme('dark');
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (!localStorage.getItem('theme')) setTheme(e.matches ? 'dark' : 'light');
+            });
+        }
+
+        function setTheme(theme) {
+            isDarkTheme = theme === 'dark';
+            document.body.classList.toggle('dark-theme', isDarkTheme);
+            localStorage.setItem('theme', theme);
+            updateThemeIcon();
+            if (statusChart) updateChartsTheme();
+        }
+
+        function toggleTheme() {
+            setTheme(isDarkTheme ? 'light' : 'dark');
+        }
+
+        function updateThemeIcon() {
+            document.getElementById('themeBtn').textContent = isDarkTheme ? '☀️' : '🌙';
+        }
+
+        function updateChartsTheme() {
+            const textColor = isDarkTheme ? '#e0e0e0' : '#333333';
+            [statusChart, priorityChart, categoryChart, assigneeChart].forEach(chart => {
+                if (chart) {
+                    chart.setOption({
+                        legend: { textStyle: { color: textColor } },
+                        series: [{ label: { color: textColor } }]
+                    });
+                }
+            });
+        }
 
         // Initialize charts when the page loads
         function initCharts() {
@@ -160,6 +249,8 @@
         }
 
         function updateCharts(data) {
+            const textColor = isDarkTheme ? '#e0e0e0' : '#333333';
+            
             // Task Status Chart (Completed vs Pending)
             const statusOption = {
                 tooltip: {
@@ -168,7 +259,8 @@
                 legend: {
                     orient: 'horizontal',
                     bottom: '5%',
-                    padding: [20, 0, 0, 0]
+                    padding: [20, 0, 0, 0],
+                    textStyle: { color: textColor }
                 },
                 series: [{
                     name: 'Task Status',
@@ -184,7 +276,8 @@
                             shadowOffsetX: 0,
                             shadowColor: 'rgba(0, 0, 0, 0.5)'
                         }
-                    }
+                    },
+                    label: { color: textColor }
                 }]
             };
             
@@ -196,7 +289,8 @@
                 legend: {
                     orient: 'horizontal',
                     bottom: '5%',
-                    padding: [20, 0, 0, 0]
+                    padding: [20, 0, 0, 0],
+                    textStyle: { color: textColor }
                 },
                 series: [{
                     name: 'Priority Levels',
@@ -214,7 +308,8 @@
                             shadowOffsetX: 0,
                             shadowColor: 'rgba(0, 0, 0, 0.5)'
                         }
-                    }
+                    },
+                    label: { color: textColor }
                 }]
             };
             
@@ -226,7 +321,8 @@
                 legend: {
                     orient: 'horizontal',
                     bottom: '5%',
-                    padding: [20, 0, 0, 0]
+                    padding: [20, 0, 0, 0],
+                    textStyle: { color: textColor }
                 },
                 series: [{
                     name: 'Categories',
@@ -242,7 +338,8 @@
                             shadowOffsetX: 0,
                             shadowColor: 'rgba(0, 0, 0, 0.5)'
                         }
-                    }
+                    },
+                    label: { color: textColor }
                 }]
             };
             
@@ -254,7 +351,8 @@
                 legend: {
                     orient: 'horizontal',
                     bottom: '5%',
-                    padding: [20, 0, 0, 0]
+                    padding: [20, 0, 0, 0],
+                    textStyle: { color: textColor }
                 },
                 series: [{
                     name: 'Assignees',
@@ -267,7 +365,8 @@
                             shadowOffsetX: 0,
                             shadowColor: 'rgba(0, 0, 0, 0.5)'
                         }
-                    }
+                    },
+                    label: { color: textColor }
                 }]
             };
             
@@ -418,6 +517,7 @@
 
         // Initialize charts and load data when page loads
         window.onload = function() {
+            initTheme();
             initCharts();
             loadTodoData();
         };
