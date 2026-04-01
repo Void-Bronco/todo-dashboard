@@ -209,7 +209,8 @@ class SupabaseMigration:
                         category: text DEFAULT 'no category',
                         assignee: text,
                         created_at: timestamp DEFAULT NOW(),
-                        completed_at: timestamp
+                        completed_at: timestamp,
+                        parent_id: integer REFERENCES todos(id)
                     );
                 '''
             }).execute()
@@ -252,3 +253,16 @@ class SupabaseMigration:
             if isinstance(cat, str):
                 cat = {'name': cat}
             client.table(self.categories_table).insert(cat).execute()
+
+    def add_parent_id_column(self) -> None:
+        """Add parent_id column to existing todos table for subtask support."""
+        client = self._get_admin_client()
+        try:
+            client.rpc('exec', {
+                'query': '''
+                    ALTER TABLE todos ADD COLUMN IF NOT EXISTS parent_id integer REFERENCES todos(id);
+                    CREATE INDEX IF NOT EXISTS idx_todos_parent_id ON todos(parent_id);
+                '''
+            }).execute()
+        except Exception:
+            pass

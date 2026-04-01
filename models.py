@@ -15,6 +15,8 @@ class TodoItem(BaseModel):
     category: str = 'no category'
     assignee: Optional[str] = None
     completedAt: Optional[str] = None
+    parentId: Optional[int] = None
+    context: Optional[str] = None
 
     def __getitem__(self, key: str) -> Any:
         return getattr(self, key)

@@ -1015,3 +1015,166 @@ class TestListCommandEdgeCases:
 
         todos = todo_manager.list_todos(list_='backlog')
         assert len(todos) == 0
+
+
+class TestSubtaskSupport:
+    def test_add_subtask_with_parent_id(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        parent = todo_manager.add_todo('Parent task')
+        subtask = todo_manager.add_todo('Subtask', parent_id=parent.id)
+
+        assert subtask.parentId == parent.id
+        assert subtask.category == 'no category'
+        assert subtask.assignee is None
+
+    def test_add_subtask_no_inheritance(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        parent = todo_manager.add_todo('Parent', category='work', assignee='Neo')
+        subtask = todo_manager.add_todo('Subtask', parent_id=parent.id)
+
+        assert subtask.category == 'no category'
+        assert subtask.assignee is None
+
+    def test_add_subtask_parent_not_found(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+
+        with pytest.raises(ValueError, match='Parent todo with ID 999 not found'):
+            todo_manager.add_todo('Subtask', parent_id=999)
+
+    def test_complete_parent_no_propagation(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        parent = todo_manager.add_todo('Parent')
+        subtask = todo_manager.add_todo('Subtask', parent_id=parent.id)
+
+        todo_manager.mark_complete(parent.id)
+
+        parent_todo = next(t for t in todo_manager.todos if t.id == parent.id)
+        subtask_todo = next(t for t in todo_manager.todos if t.id == subtask.id)
+
+        assert parent_todo.completed is True
+        assert subtask_todo.completed is False
+
+    def test_list_shows_subtasks_inline(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        parent = todo_manager.add_todo('Parent task')
+        subtask = todo_manager.add_todo('Subtask', parent_id=parent.id)
+
+        todos = todo_manager.list_todos()
+        assert len(todos) == 2
+
+        top_level = [t for t in todos if t.parentId is None]
+        subtasks = [t for t in todos if t.parentId is not None]
+
+        assert len(top_level) == 1
+        assert len(subtasks) == 1
+        assert subtasks[0].parentId == parent.id
+
+    def test_list_no_subtasks_flag(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        parent = todo_manager.add_todo('Parent task')
+        todo_manager.add_todo('Subtask', parent_id=parent.id)
+
+        todos = todo_manager.list_todos(include_subtasks=False)
+        assert len(todos) == 1
+        assert todos[0].parentId is None
+
+    def test_list_pending_includes_pending_subtasks(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        parent = todo_manager.add_todo('Parent')
+        subtask = todo_manager.add_todo('Subtask', parent_id=parent.id)
+
+        todos = todo_manager.list_todos('pending', include_subtasks=True)
+        assert len(todos) == 2
+
+    def test_remove_orphan_keeps_subtasks(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        parent = todo_manager.add_todo('Parent')
+        subtask = todo_manager.add_todo('Subtask', parent_id=parent.id)
+
+        todo_manager.remove_todo(parent.id, cascade=False)
+
+        remaining = todo_manager.list_todos()
+        assert len(remaining) == 1
+        assert remaining[0].parentId is None
+        assert remaining[0].text == 'Subtask'
+
+    def test_remove_cascade_removes_subtasks(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        parent = todo_manager.add_todo('Parent')
+        subtask = todo_manager.add_todo('Subtask', parent_id=parent.id)
+
+        todo_manager.remove_todo(parent.id, cascade=True)
+
+        remaining = todo_manager.list_todos()
+        assert len(remaining) == 0
+
+    def test_update_move_subtask_to_parent(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        parent1 = todo_manager.add_todo('Parent 1')
+        parent2 = todo_manager.add_todo('Parent 2')
+        subtask = todo_manager.add_todo('Subtask', parent_id=parent1.id)
+
+        todo_manager.update_todo(subtask.id, parent_id=parent2.id)
+
+        updated = next(t for t in todo_manager.todos if t.id == subtask.id)
+        assert updated.parentId == parent2.id
+
+    def test_update_make_subtask_top_level(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        parent = todo_manager.add_todo('Parent')
+        subtask = todo_manager.add_todo('Subtask', parent_id=parent.id)
+
+        todo_manager.update_todo(subtask.id, parent_id=None)
+
+        updated = next(t for t in todo_manager.todos if t.id == subtask.id)
+        assert updated.parentId is None
+
+
+class TestContextField:
+    def test_add_todo_with_context(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Task', context='Some context notes')
+
+        assert todo.context == 'Some context notes'
+
+    def test_add_todo_without_context(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Task')
+
+        assert todo.context is None
+
+    def test_update_todo_context(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Task')
+
+        todo_manager.update_todo(todo.id, context='Updated context')
+
+        updated = next(t for t in todo_manager.todos if t.id == todo.id)
+        assert updated.context == 'Updated context'
+
+    def test_clear_context(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Task', context='Some context')
+
+        todo_manager.update_todo(todo.id, context=None)
+
+        updated = next(t for t in todo_manager.todos if t.id == todo.id)
+        assert updated.context is None
+
+    def test_context_persists_in_todo_item(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo_manager.add_todo('Task 1', context='Context 1')
+        todo_manager.add_todo('Task 2')
+
+        todos = todo_manager.list_todos()
+        todo_with_context = next((t for t in todos if t.context == 'Context 1'), None)
+
+        assert todo_with_context is not None
+        assert todo_with_context.context == 'Context 1'
+
+    def test_get_command_returns_context(self, mock_storage):
+        todo_manager = TodoManager(storage_backend=mock_storage)
+        todo = todo_manager.add_todo('Task', context='Some context notes')
+
+        retrieved = next((t for t in todo_manager.todos if t.id == todo.id), None)
+        assert retrieved.context == 'Some context notes'

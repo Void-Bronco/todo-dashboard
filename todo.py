@@ -164,7 +164,7 @@ class TodoManager:
     def list_categories(self):
         return [c['name'] if isinstance(c, dict) else c for c in self.categories]
 
-    def add_todo(self, item, priority='medium', due_date=None, category='no category', assignee=None):
+    def add_todo(self, item, priority='medium', due_date=None, category='no category', assignee=None, parent_id=None, context=None):
         if item is None or (isinstance(item, str) and not item.strip()):
             raise ValueError('Todo text cannot be empty')
 
@@ -181,6 +181,13 @@ class TodoManager:
         if category and category not in self.categories:
             self.add_category(category)
 
+        if parent_id is not None:
+            parent = next((t for t in self.todos if t.id == parent_id), None)
+            if parent is None:
+                raise ValueError(f'Parent todo with ID {parent_id} not found')
+            if parent_id == int(time.time() * 1000000):
+                raise ValueError('Cannot set self as parent')
+
         new_todo = TodoItem(
             id=int(time.time() * 1000000),
             text=item,
@@ -189,14 +196,16 @@ class TodoManager:
             priority=priority,
             dueDate=due_date,
             category=category,
-            assignee=assignee
+            assignee=assignee,
+            parentId=parent_id,
+            context=context
         )
 
         self.todos.append(new_todo)
         self.save_todos()
         return new_todo
 
-    def list_todos(self, filter_type='all', category=None, assignee=None, list_='default'):
+    def list_todos(self, filter_type='all', category=None, assignee=None, list_='default', include_subtasks=True):
         filtered_todos = list(self.todos)
 
         if list_ == 'default':
@@ -205,6 +214,9 @@ class TodoManager:
             filtered_todos = [t for t in filtered_todos if t.priority.lower() == 'backlog']
         elif list_ == 'all':
             pass
+
+        if not include_subtasks:
+            filtered_todos = [t for t in filtered_todos if t.parentId is None]
 
         if category:
             category_lower = category.lower()
@@ -227,11 +239,23 @@ class TodoManager:
             ]
 
         if filter_type == 'pending':
-            filtered_todos = [todo for todo in filtered_todos if not todo.completed]
+            filtered_todos = [
+                todo for todo in filtered_todos
+                if not todo.completed or (todo.parentId is not None and self._get_todo_by_id(todo.parentId) and not self._get_todo_by_id(todo.parentId).completed)
+            ]
         elif filter_type == 'completed':
-            filtered_todos = [todo for todo in filtered_todos if todo.completed]
+            filtered_todos = [
+                todo for todo in filtered_todos
+                if todo.completed or (todo.parentId is not None and self._get_todo_by_id(todo.parentId) and self._get_todo_by_id(todo.parentId).completed)
+            ]
 
         return filtered_todos
+
+    def _get_todo_by_id(self, todo_id):
+        for todo in self.todos:
+            if todo.id == todo_id:
+                return todo
+        return None
 
     def mark_complete(self, todo_id):
         for todo in self.todos:
@@ -263,11 +287,22 @@ class TodoManager:
         except Exception as error:
             print(f'Error checking for associated cron jobs: {error}')
 
-    def remove_todo(self, todo_id):
+    def remove_todo(self, todo_id, cascade=False):
         for i, todo in enumerate(self.todos):
             if todo.id == todo_id:
-                removed = self.todos.pop(i)
-                self._deleted_ids.add(todo_id)
+                subtasks = [t for t in self.todos if t.parentId == todo_id]
+                removed = todo
+
+                if cascade:
+                    ids_to_remove = {todo_id} | {t.id for t in subtasks}
+                    self.todos = [t for t in self.todos if t.id not in ids_to_remove]
+                    self._deleted_ids.update(ids_to_remove)
+                else:
+                    for t in subtasks:
+                        t.parentId = None
+                    self.todos.pop(i)
+                    self._deleted_ids.add(todo_id)
+
                 self.save_todos()
                 return removed
         return None
@@ -358,6 +393,23 @@ class TodoManager:
                     else:
                         todo.completedAt = None
 
+                if 'parent_id' in kwargs:
+                    parent_id = kwargs['parent_id']
+                    if parent_id is not None and parent_id != 'none':
+                        parent_id = int(parent_id)
+                        if parent_id == todo_id:
+                            raise ValueError('Cannot set self as parent')
+                        parent = next((t for t in self.todos if t.id == parent_id), None)
+                        if parent is None:
+                            raise ValueError(f'Parent todo with ID {parent_id} not found')
+                    else:
+                        parent_id = None
+                    todo.parentId = parent_id
+
+                if 'context' in kwargs:
+                    context_val = kwargs['context']
+                    todo.context = context_val
+
                 self.save_todos()
                 return todo
         return None
@@ -373,16 +425,19 @@ def main():
         print('''Todo List Manager
 
 Usage:
-  todo add [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] <item text>
-  todo list [--filter all|pending|completed] [--list default|backlog|all] [--category NAME] [--assignee NAME] [--json|--text]
-  todo update <id> [--text "text"] [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--completed|--pending] [--id NEW_ID]
+  todo add [--priority P] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--parent <id>] [--context TEXT] <text>
+  todo list [--filter all|pending|completed] [--list default|backlog|all] [--category NAME] [--assignee NAME] [--json|--text] [--no-subtasks]
+  todo get <id>
+  todo update <id> [--text TEXT] [--priority P] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--context TEXT] [--completed|--pending] [--id NEW_ID] [--parent <id>|none]
   todo complete <id>
-  todo remove <id>
+  todo remove <id> [--orphan|--cascade]
   todo stats
   todo categories
   todo add-category <name>
   todo remove-category <name>
-  todo export [--format json|yaml]''')
+  todo export [--format json|yaml]
+
+Use -h for detailed help.''')
         sys.exit(0)
 
     command = sys.argv[1]
@@ -398,13 +453,15 @@ Usage:
     if command == 'add':
         if args and args[0] in ('-h', '--help'):
             print('''Usage:
-  todo add [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] <item text>
+  todo add [--priority P] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--parent <id>] [--context TEXT] <item text>
 
 Options:
-  --priority high|medium|low|backlog    Set priority (default: medium)
+  --priority P                  Set priority: high, medium, low, backlog (default: medium)
   --due YYYY-MM-DD              Set due date
   --category NAME               Set category
   --assignee NAME              Set assignee (can be empty string)
+  --parent ID                  Set parent todo ID (creates subtask)
+  --context TEXT               Set context/notes for the item
   --high                        Shortcut for --priority high
   --low                         Shortcut for --priority low
   -h, --help                    Show this help message
@@ -413,13 +470,17 @@ Examples:
   todo add "Buy groceries"
   todo add "Finish report" --priority high
   todo add "Submit form" --due 2024-12-31 --category work
-  todo add "Call mom" --assignee Neo''')
+  todo add "Call mom" --assignee Neo
+  todo add "Subtask" --parent 123
+  todo add "Task with context" --context "Additional notes"''')
             sys.exit(0)
 
         priority = 'medium'
         due_date = None
         category = 'no category'
         assignee = None
+        parent_id = None
+        context = None
         item_text = None
 
         i = 0
@@ -436,6 +497,12 @@ Examples:
             elif args[i] == '--assignee' and i + 1 < len(args):
                 assignee = args[i + 1]
                 i += 2
+            elif args[i] == '--parent' and i + 1 < len(args):
+                parent_id = int(args[i + 1])
+                i += 2
+            elif args[i] == '--context' and i + 1 < len(args):
+                context = args[i + 1]
+                i += 2
             elif args[i] == '-a' and i + 1 < len(args):
                 category = args[i + 1]
                 i += 2
@@ -451,15 +518,16 @@ Examples:
 
         if not item_text:
             print('Error: Item text is required')
-            print('Usage: todo add [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] <item text>')
+            print('Usage: todo add [--priority P] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--parent <id>] [--context TEXT] <item text>')
             print('For help: todo add -h')
             sys.exit(1)
 
         try:
-            new_todo = todo_manager.add_todo(item_text, priority, due_date, category, assignee)
+            new_todo = todo_manager.add_todo(item_text, priority, due_date, category, assignee, parent_id, context)
             due_info = f', Due: {new_todo.dueDate}' if new_todo.dueDate else ''
             assignee_info = f', Assignee: {new_todo.assignee}' if new_todo.assignee else ''
-            print(f'Added: {new_todo.text} (ID: {new_todo.id}, Category: {new_todo.category}){due_info}{assignee_info}')
+            parent_info = f', Parent: {new_todo.parentId}' if new_todo.parentId else ''
+            print(f'Added: {new_todo.text} (ID: {new_todo.id}, Category: {new_todo.category}){due_info}{assignee_info}{parent_info}')
         except ValueError as e:
             print(f'Error: {e}')
             sys.exit(1)
@@ -490,6 +558,7 @@ Options:
         list_filter = 'default'
         fields = None
         output_format = 'json'
+        include_subtasks = True
 
         i = 0
         while i < len(args):
@@ -527,10 +596,13 @@ Options:
             elif args[i] == '--list' and i + 1 < len(args):
                 list_filter = args[i + 1]
                 i += 2
+            elif args[i] == '--no-subtasks':
+                include_subtasks = False
+                i += 1
             else:
                 i += 1
 
-        todos = todo_manager.list_todos(filter_type, category_filter, assignee_filter, list_filter)
+        todos = todo_manager.list_todos(filter_type, category_filter, assignee_filter, list_filter, include_subtasks)
 
         if not todos:
             if output_format == 'json':
@@ -550,7 +622,7 @@ Options:
                     ]
                 else:
                     output_todos = [
-                        {k: v for k, v in todo.model_dump().items() if v is not None}
+                        {k: v for k, v in todo.model_dump().items() if v is not None and k != 'context'}
                         for todo in todos
                     ]
                 print(json.dumps(output_todos, indent=2))
@@ -562,7 +634,10 @@ Options:
                     title += f" for assignee '{assignee_filter}'"
                 print(f'{title}:')
 
-                for todo in todos:
+                top_level_todos = [t for t in todos if t.parentId is None]
+
+                def print_todo(todo, indent=0):
+                    prefix = '  ' * indent
                     parts = []
                     if fields is None or 'id' in fields:
                         parts.append(f'#{todo.id}')
@@ -582,7 +657,66 @@ Options:
                     if fields is None or 'assignee' in fields:
                         if todo.assignee:
                             parts.append(f'@{todo.assignee}')
-                    print(' '.join(parts))
+                    print(f'{prefix}{" ".join(parts)}')
+
+                    subtasks = [t for t in todos if t.parentId == todo.id]
+                    for subtask in subtasks:
+                        print_todo(subtask, indent + 1)
+
+                for todo in top_level_todos:
+                    print_todo(todo)
+
+    elif command == 'get':
+        if not args or args[0] in ('-h', '--help'):
+            print('''Usage:
+  todo get <id> [--json|--text]
+
+Options:
+  --json                         Output in JSON format (default)
+  --text                         Output in human-readable text format
+  -h, --help                     Show this help message
+
+Examples:
+  todo get 123
+  todo get 123 --text''')
+            sys.exit(0)
+
+        if not args or not args[0].isdigit():
+            print('Usage: todo get <id> [--json|--text]')
+            print('For help: todo get -h')
+            sys.exit(1)
+
+        todo_id = int(args[0])
+        output_format = 'json'
+        if len(args) > 1:
+            if args[1] == '--text':
+                output_format = 'text'
+
+        todo = next((t for t in todo_manager.todos if t.id == todo_id), None)
+        if not todo:
+            print(f'Todo with ID {todo_id} not found.')
+            sys.exit(1)
+
+        if output_format == 'json':
+            print(json.dumps({k: v for k, v in todo.model_dump().items() if v is not None}, indent=2))
+        else:
+            parts = []
+            parts.append(f'#{todo.id}')
+            status = '[x]' if todo.completed else '[ ]'
+            parts.append(status)
+            parts.append(f'[{todo.priority}]')
+            parts.append(todo.text)
+            if todo.dueDate:
+                parts.append(f'(Due: {todo.dueDate})')
+            if todo.category and todo.category != 'no category':
+                parts.append(f'[{todo.category}]')
+            if todo.assignee:
+                parts.append(f'@{todo.assignee}')
+            if todo.parentId:
+                parts.append(f'(Parent: {todo.parentId})')
+            print(' '.join(parts))
+            if todo.context:
+                print(f'Context: {todo.context}')
 
     elif command in ('complete', 'done'):
         if not args:
@@ -597,14 +731,45 @@ Options:
 
     elif command in ('remove', 'delete'):
         if not args:
-            print('Usage: todo remove <id>')
+            print('Usage: todo remove <id> [--orphan|--cascade]')
+            print('  --orphan   Remove parent, keep subtasks as top-level')
+            print('  --cascade  Remove parent and all subtasks')
             sys.exit(1)
 
-        removed = todo_manager.remove_todo(int(args[0]))
+        todo_id = None
+        cascade = False
+
+        i = 0
+        while i < len(args):
+            if args[i] == '--cascade':
+                cascade = True
+                i += 1
+            elif args[i] == '--orphan':
+                cascade = False
+                i += 1
+            elif args[i].isdigit():
+                todo_id = int(args[i])
+                i += 1
+            else:
+                i += 1
+
+        if todo_id is None:
+            print('Usage: todo remove <id> [--orphan|--cascade]')
+            sys.exit(1)
+
+        todo_to_remove = next((t for t in todo_manager.todos if t.id == todo_id), None)
+        if todo_to_remove and todo_to_remove.parentId is not None and cascade:
+            print('Error: Use --orphan or --cascade to remove a subtask')
+            sys.exit(1)
+
+        removed = todo_manager.remove_todo(todo_id, cascade)
         if removed:
-            print(f'Removed: {removed.text}')
+            if cascade:
+                print(f'Removed: {removed.text} (and subtasks)')
+            else:
+                print(f'Removed: {removed.text}')
         else:
-            print(f'Todo with ID {args[0]} not found.')
+            print(f'Todo with ID {todo_id} not found.')
 
     elif command == 'stats':
         stats = todo_manager.get_stats()
@@ -660,26 +825,32 @@ Options:
     elif command == 'update':
         if not args or args[0] in ('-h', '--help'):
             print('''Usage:
-  todo update <id> [--text "text"] [--priority high|medium|low|backlog]
-                   [--due YYYY-MM-DD] [--category NAME] [--assignee NAME]
-                   [--completed | --pending] [--id NEW_ID]
+  todo update <id> [--text TEXT] [--priority P] [--due YYYY-MM-DD]
+                   [--category NAME] [--assignee NAME] [--context TEXT]
+                   [--completed | --pending] [--id NEW_ID] [--parent <id>|none]
 
 Options:
-  --text "text"                   Update the todo text
-  --priority high|medium|low|backlog      Update priority
+  --text TEXT                    Update the todo text
+  --priority P                  Update priority: high, medium, low, backlog
   --due YYYY-MM-DD              Update due date (use empty to clear)
   --category NAME               Update category
   --assignee NAME               Update assignee (use empty string to clear)
+  --context TEXT                 Update context (use empty to clear)
   --completed                   Mark as completed
   --pending                      Mark as pending
   --id NEW_ID                   Change the todo ID
+  --parent <id>|none            Set or remove parent (make subtask top-level)
   -h, --help                    Show this help message
 
 Examples:
   todo update 1 --priority high
   todo update 1 --assignee Neo --priority high
   todo update 1 --due 2024-12-31 --category work
-  todo update 1 --assignee ""''')
+  todo update 1 --assignee ""
+  todo update 1 --context "Updated notes"
+  todo update 1 --context ""     # Clear context
+  todo update 1 --parent none   # Make top-level
+  todo update 1 --parent 123   # Move to parent 123''')
             sys.exit(0)
 
         todo_id = None
@@ -704,6 +875,10 @@ Examples:
                 assignee_val = args[i + 1]
                 update_kwargs['assignee'] = assignee_val if assignee_val else ''
                 i += 2
+            elif args[i] == '--context' and i + 1 < len(args):
+                context_val = args[i + 1]
+                update_kwargs['context'] = context_val if context_val else None
+                i += 2
             elif args[i] == '--completed':
                 update_kwargs['completed'] = True
                 i += 1
@@ -713,6 +888,10 @@ Examples:
             elif args[i] == '--id' and i + 1 < len(args):
                 update_kwargs['id'] = args[i + 1]
                 i += 2
+            elif args[i] == '--parent' and i + 1 < len(args):
+                parent_val = args[i + 1]
+                update_kwargs['parent_id'] = parent_val
+                i += 2
             elif args[i].isdigit() and todo_id is None:
                 todo_id = int(args[i])
                 i += 1
@@ -721,7 +900,7 @@ Examples:
 
         if not todo_id:
             print('Error: Todo ID is required')
-            print('Usage: todo update <id> [--text "text"] [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME]')
+            print('Usage: todo update <id> [--text "text"] [--priority high|medium|low|backlog] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--parent <id>|none]')
             sys.exit(1)
 
         try:

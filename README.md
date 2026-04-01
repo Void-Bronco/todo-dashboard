@@ -8,6 +8,8 @@ A skill for managing personal todo lists with add, remove, complete, and view fu
 - Priority levels (high, medium, low, backlog)
 - Categories and assignees
 - Due dates
+- **Context/notes** - optional text for additional information
+- **Subtasks** - nested todos under parents
 - Multiple storage backends (local, GitHub, Supabase)
 
 ## Setup
@@ -49,15 +51,57 @@ supabase:
   secret_key: your-secret-key
 ```
 
+## Context
+
+Use `--context` to add optional notes to any item. Context is only shown with `todo get <id>`, not in list output.
+
+```bash
+todo add "Task with notes" --context "Additional information"
+todo update 123 --context "Updated notes"
+todo update 123 --context ""    # Clear context
+todo get 123                    # Shows context
+```
+
 ## Backlog
 
 Items with `priority: "backlog"` are hidden from the default view:
 
 ```bash
-todo add "Later task" --priority backlog    # Add to backlog
+todo add "Later task" --priority backlog
 todo list                                    # Excludes backlog
 todo list --all                             # Includes backlog
 todo list --list backlog                    # Only backlog
+```
+
+## Subtasks
+
+Subtasks are nested under parent todos. Subtasks do not inherit category or assignee from parent.
+
+```bash
+# Add subtask
+todo add "Subtask" --parent 123
+
+# Move subtask to different parent
+todo update 124 --parent 456
+
+# Make subtask top-level
+todo update 124 --parent none
+
+# Remove parent, keep subtasks as top-level
+todo remove 123 --orphan
+
+# Remove parent and all subtasks
+todo remove 123 --cascade
+```
+
+### Subtask Display
+
+In text format, subtasks are shown indented under their parents:
+
+```
+#123 [ ] [medium] Parent task
+  #124 [ ] [low] Subtask 1
+#125 [x] [high] Another parent
 ```
 
 ## Data Format
@@ -72,7 +116,9 @@ todo list --list backlog                    # Only backlog
       "priority": "medium",
       "dueDate": null,
       "category": "no category",
-      "assignee": null
+      "assignee": null,
+      "parentId": null,
+      "context": null
     }
   ],
   "categories": ["no category", "work"]
