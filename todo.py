@@ -20,13 +20,14 @@ class TodoManager:
         self,
         workspace_dir: str = "/home/neo/clawd",
         storage_backend: Optional[Any] = None,
+        config_path: Optional[str] = None,
     ) -> None:
         self.workspace_dir = workspace_dir
 
         if storage_backend is not None:
             self._storage = storage_backend
         else:
-            cfg = config.Config()
+            cfg = config.Config(config_path=config_path)
             cfg.validate()
             self._storage = self._create_storage_from_config(cfg)
 

@@ -25,6 +25,9 @@ def _create_parser() -> argparse.ArgumentParser:
         prog="todo",
         description="Todo List Manager",
     )
+    parser.add_argument(
+        "-c", "--config", dest="config_path", help="Path to config file"
+    )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     _add_parser = argparse.ArgumentParser(add_help=False)
@@ -359,7 +362,7 @@ def main() -> None:
         sys.exit(0)
 
     try:
-        todo_manager = TodoManager()
+        todo_manager = TodoManager(config_path=args.config_path)
     except ValueError as e:
         print(f"Configuration error: {e}")
         print("Please create a config.yml file based on config.yml.sample")
