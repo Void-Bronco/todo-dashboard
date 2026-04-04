@@ -1,43 +1,41 @@
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, Literal, Any
-from datetime import datetime
+from __future__ import annotations
+
+from typing import Any, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TodoItem(BaseModel):
-    model_config = ConfigDict(extra='allow')
+    """Todo item data model."""
+
+    model_config = ConfigDict(extra="allow")
 
     id: int
     text: str = Field(..., min_length=1)
     completed: bool = False
     createdAt: Optional[str] = None
-    priority: Literal['high', 'medium', 'low', 'backlog'] = 'medium'
+    priority: str = "medium"
     dueDate: Optional[str] = None
-    category: str = 'no category'
+    category: str = "no category"
     assignee: Optional[str] = None
     completedAt: Optional[str] = None
     parentId: Optional[int] = None
     context: Optional[str] = None
 
-    def __getitem__(self, key: str) -> Any:
-        return getattr(self, key)
-
-    def get(self, key: str, default: Any = None) -> Any:
-        return getattr(self, key, default)
-
-    def __contains__(self, key: str) -> bool:
-        return hasattr(self, key)
-
     @classmethod
-    def from_dict(cls, data: dict) -> 'TodoItem':
-        if 'assignee' not in data:
-            data['assignee'] = None
-        if 'completedAt' not in data:
-            data['completedAt'] = None
-        return cls(**data)
+    def from_dict(cls, data: dict[str, Any]) -> TodoItem:
+        """Create a TodoItem from a dictionary (for backward compatibility)."""
+        if "assignee" not in data:
+            data["assignee"] = None
+        if "completedAt" not in data:
+            data["completedAt"] = None
+        return cls.model_validate(data)
 
 
 class TodoListData(BaseModel):
-    model_config = ConfigDict(extra='allow')
+    """Container for todos and categories."""
 
-    todos: list[dict] = []
-    categories: list[str] = ['no category']
+    model_config = ConfigDict(extra="allow")
+
+    todos: list[dict[str, Any]] = []
+    categories: list[str] = ["no category"]

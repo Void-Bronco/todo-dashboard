@@ -48,6 +48,11 @@ class SupabaseStorage(StorageBackend):
         self.categories_table = categories_table
         self._client = None
 
+    @property
+    def supports_crud(self) -> bool:
+        """SupabaseStorage supports individual CRUD operations."""
+        return True
+
     def _get_client(self):
         if self._client is None:
             from supabase import create_client

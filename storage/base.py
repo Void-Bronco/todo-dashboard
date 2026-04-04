@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
+from typing import Any, Dict
 
 
 class StorageBackend(ABC):
     """Abstract base class for todo storage backends."""
+
+    @property
+    def supports_crud(self) -> bool:
+        """Override in subclasses that support individual CRUD operations."""
+        return False
 
     @abstractmethod
     def load(self) -> Dict[str, Any]:
@@ -44,7 +49,7 @@ class StorageBackend(ABC):
     def add(self, todo: Dict[str, Any]) -> int:
         """
         Add a single todo. Override in subclasses that support individual operations.
-        
+
         Returns:
             The ID of the inserted todo.
         """

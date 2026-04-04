@@ -9,6 +9,8 @@ from typing import Dict, Any
 class MockStorage:
     """In-memory mock for StorageBackend - NO filesystem I/O."""
 
+    supports_crud = False
+
     def __init__(self, initial_data: Dict[str, Any] = None):
         self._data = initial_data or {'todos': [], 'categories': [{'name': 'no category'}]}
         self._exists = True
