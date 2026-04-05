@@ -20,6 +20,19 @@ A skill for managing personal todo lists with add, remove, complete, and view fu
 
 ## Configuration
 
+### Config File Location
+
+Use `-c` or `--config` to specify a custom config file path:
+
+```bash
+todo -c /path/to/config.yml list
+```
+
+Config loading priority (highest to lowest):
+1. Explicit path via `-c` / `--config`
+2. Local search: `./config.yml` or `<module_dir>/config.yml`
+3. Default (local storage with `./todo-data.yml`)
+
 ### Local Storage (Default)
 
 ```yaml

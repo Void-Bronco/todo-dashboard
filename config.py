@@ -39,6 +39,19 @@ class StorageConfig:
 
 
 class Config:
+    """Configuration manager for todo-list storage.
+
+    Config loading priority (highest to lowest):
+        1. Explicit config_path passed to __init__ (via -c CLI flag)
+        2. Local config search: ./config.yml, then <module_dir>/config.yml
+        3. Defaults (if fail_if_no_config=False)
+
+    Args:
+        config_path: Explicit path to config file. If provided, takes highest priority.
+        fail_if_no_config: If True, raises ValueError when no config found.
+                           If False, uses default (local storage) configuration.
+    """
+
     def __init__(
         self, config_path: Optional[str] = None, fail_if_no_config: bool = True
     ) -> None:
@@ -57,6 +70,15 @@ class Config:
             self._load_defaults()
 
     def _find_config(self) -> Optional[str]:
+        """Search for config.yml in local directories.
+
+        Search order:
+            1. Current working directory: ./config.yml
+            2. Module directory: <todo-list>/config.yml
+
+        Returns:
+            Path to first found config.yml, or None if not found.
+        """
         possible_paths = [
             Path.cwd() / "config.yml",
             Path(__file__).parent / "config.yml",
