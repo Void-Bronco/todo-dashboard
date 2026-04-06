@@ -118,9 +118,7 @@ class TodoManager:
         return cat["name"].lower() if isinstance(cat, dict) else cat.lower()
 
     def add_category(self, category_name: str) -> bool:
-        if category_name is None or (
-            isinstance(category_name, str) and not category_name.strip()
-        ):
+        if category_name is None or (isinstance(category_name, str) and not category_name.strip()):
             raise ValueError("Category name cannot be empty")
 
         normalized_category = category_name.strip()
@@ -134,14 +132,13 @@ class TodoManager:
         return True
 
     def remove_category(self, category_name: str) -> bool:
-        if category_name is None or (
-            isinstance(category_name, str) and not category_name.strip()
-        ):
+        if category_name is None or (isinstance(category_name, str) and not category_name.strip()):
             raise ValueError("Category name cannot be empty")
 
-        if len(self.categories) == 1 and self._get_category_name(
-            self.categories[0]
-        ) == category_name.strip().lower():
+        if (
+            len(self.categories) == 1
+            and self._get_category_name(self.categories[0]) == category_name.strip().lower()
+        ):
             raise ValueError("Cannot remove the last remaining category")
 
         normalized_category = category_name.strip()
@@ -163,9 +160,7 @@ class TodoManager:
         return False
 
     def list_categories(self) -> list[str]:
-        return [
-            c["name"] if isinstance(c, dict) else c for c in self.categories
-        ]
+        return [c["name"] if isinstance(c, dict) else c for c in self.categories]
 
     def add_todo(
         self,
@@ -190,9 +185,7 @@ class TodoManager:
             try:
                 datetime.strptime(due_date, "%Y-%m-%d")
             except ValueError:
-                raise ValueError(
-                    f'Invalid due date format "{due_date}". Use YYYY-MM-DD'
-                )
+                raise ValueError(f'Invalid due date format "{due_date}". Use YYYY-MM-DD')
 
         if category and category not in self.categories:
             self.add_category(category)
@@ -232,13 +225,9 @@ class TodoManager:
         filtered_todos = list(self.todos)
 
         if list_ == "default":
-            filtered_todos = [
-                t for t in filtered_todos if t.priority.lower() != "backlog"
-            ]
+            filtered_todos = [t for t in filtered_todos if t.priority.lower() != "backlog"]
         elif list_ == "backlog":
-            filtered_todos = [
-                t for t in filtered_todos if t.priority.lower() == "backlog"
-            ]
+            filtered_todos = [t for t in filtered_todos if t.priority.lower() == "backlog"]
         elif list_ == "all":
             pass
 
@@ -255,9 +244,7 @@ class TodoManager:
                 ]
             else:
                 filtered_todos = [
-                    todo
-                    for todo in filtered_todos
-                    if todo.category.lower() == category_lower
+                    todo for todo in filtered_todos if todo.category.lower() == category_lower
                 ]
 
         if assignee:
@@ -393,9 +380,7 @@ class TodoManager:
             "categories": categories,
         }
 
-    def update_todo(
-        self, todo_id: int, **kwargs: Any
-    ) -> Optional[TodoItem]:
+    def update_todo(self, todo_id: int, **kwargs: Any) -> Optional[TodoItem]:
         for todo in self.todos:
             if todo.id == todo_id:
                 if "text" in kwargs:
@@ -457,9 +442,7 @@ class TodoManager:
                         parent_id = int(parent_id)
                         if parent_id == todo_id:
                             raise ValueError("Cannot set self as parent")
-                        parent = next(
-                            (t for t in self.todos if t.id == parent_id), None
-                        )
+                        parent = next((t for t in self.todos if t.id == parent_id), None)
                         if parent is None:
                             raise ValueError(f"Parent todo with ID {parent_id} not found")
                     else:
@@ -477,9 +460,11 @@ class TodoManager:
 
 def _setup_logging() -> None:
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.ERROR,
         format="%(levelname)s: %(message)s",
     )
+    logging.getLogger("httpx").setLevel(logging.ERROR)
+    logging.getLogger("supabase").setLevel(logging.ERROR)
 
 
 def _create_parser() -> argparse.ArgumentParser:
@@ -487,14 +472,14 @@ def _create_parser() -> argparse.ArgumentParser:
         prog="todo",
         description="Todo List Manager",
     )
-    parser.add_argument(
-        "-c", "--config", dest="config_path", help="Path to config file"
-    )
+    parser.add_argument("-c", "--config", dest="config_path", help="Path to config file")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     _add_parser = argparse.ArgumentParser(add_help=False)
     _add_parser.add_argument("text", help="The todo text")
-    _add_parser.add_argument("--priority", "-p", choices=["high", "medium", "low", "backlog"], default="medium")
+    _add_parser.add_argument(
+        "--priority", "-p", choices=["high", "medium", "low", "backlog"], default="medium"
+    )
     _add_parser.add_argument("--due", metavar="YYYY-MM-DD", help="Due date")
     _add_parser.add_argument("--category", "-a", help="Category name")
     _add_parser.add_argument("--assignee", help="Assignee name")
@@ -511,31 +496,43 @@ def _create_parser() -> argparse.ArgumentParser:
     list_parser.add_argument("--assignee", help="Filter by assignee")
     list_parser.add_argument("--list", choices=["default", "backlog", "all"], default="default")
     list_parser.add_argument("--fields", help="Comma-separated fields to display")
-    list_parser.add_argument("--json", action="store_true", default=True, dest="output_json")
-    list_parser.add_argument("--text", action="store_true", dest="output_text")
+    output_group = list_parser.add_mutually_exclusive_group()
+    output_group.add_argument("--json", action="store_true", default=False, dest="output_json")
+    output_group.add_argument("--text", action="store_true", dest="output_text")
     list_parser.add_argument("--no-subtasks", action="store_true")
 
     get_parser = subparsers.add_parser("get", help="Get a todo by ID")
     get_parser.add_argument("id", type=int, help="Todo ID")
-    get_parser.add_argument("--json", action="store_true", default=True, dest="output_json")
-    get_parser.add_argument("--text", action="store_true", dest="output_text")
+    get_output_group = get_parser.add_mutually_exclusive_group()
+    get_output_group.add_argument("--json", action="store_true", default=False, dest="output_json")
+    get_output_group.add_argument("--text", action="store_true", dest="output_text")
 
-    complete_parser = subparsers.add_parser("complete", aliases=["done"], help="Mark a todo as complete")
+    complete_parser = subparsers.add_parser(
+        "complete", aliases=["done"], help="Mark a todo as complete"
+    )
     complete_parser.add_argument("id", type=int, help="Todo ID")
 
     remove_parser = subparsers.add_parser("remove", aliases=["delete"], help="Remove a todo")
     remove_parser.add_argument("id", type=int, help="Todo ID")
-    remove_parser.add_argument("--cascade", action="store_true", help="Remove parent and all subtasks")
-    remove_parser.add_argument("--orphan", action="store_true", help="Remove parent, keep subtasks as top-level")
+    remove_parser.add_argument(
+        "--cascade", action="store_true", help="Remove parent and all subtasks"
+    )
+    remove_parser.add_argument(
+        "--orphan", action="store_true", help="Remove parent, keep subtasks as top-level"
+    )
 
     subparsers.add_parser("stats", help="Show todo statistics")
 
     subparsers.add_parser("categories", aliases=["cats"], help="List categories")
 
-    add_cat_parser = subparsers.add_parser("add-category", aliases=["new-category"], help="Add a category")
+    add_cat_parser = subparsers.add_parser(
+        "add-category", aliases=["new-category"], help="Add a category"
+    )
     add_cat_parser.add_argument("name", help="Category name")
 
-    remove_cat_parser = subparsers.add_parser("remove-category", aliases=["del-category"], help="Remove a category")
+    remove_cat_parser = subparsers.add_parser(
+        "remove-category", aliases=["del-category"], help="Remove a category"
+    )
     remove_cat_parser.add_argument("name", help="Category name")
 
     update_parser = subparsers.add_parser("update", help="Update a todo")
@@ -591,6 +588,9 @@ def _handle_list(args: argparse.Namespace, todo_manager: TodoManager) -> None:
     todos = todo_manager.list_todos(
         args.filter, args.category, args.assignee, args.list, include_subtasks
     )
+
+    if not args.output_json and not args.output_text:
+        args.output_json = True
 
     if not todos:
         if args.output_json:
@@ -667,6 +667,9 @@ def _handle_get(args: argparse.Namespace, todo_manager: TodoManager) -> None:
     if not todo:
         print(f"Todo with ID {args.id} not found.")
         sys.exit(1)
+
+    if not args.output_json and not args.output_text:
+        args.output_json = True
 
     if args.output_json:
         print(json.dumps({k: v for k, v in todo.model_dump().items() if v is not None}, indent=2))
@@ -811,10 +814,16 @@ def main() -> None:
     if not args.command:
         parser.print_help()
         print("\nUsage:")
-        print("  todo add [--priority P] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--parent <id>] [--context TEXT] <text>")
-        print("  todo list [--filter all|pending|completed] [--list default|backlog|all] [--category NAME] [--assignee NAME] [--json|--text] [--no-subtasks]")
+        print(
+            "  todo add [--priority P] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--parent <id>] [--context TEXT] <text>"
+        )
+        print(
+            "  todo list [--filter all|pending|completed] [--list default|backlog|all] [--category NAME] [--assignee NAME] [--json|--text] [--no-subtasks]"
+        )
         print("  todo get <id>")
-        print("  todo update <id> [--text TEXT] [--priority P] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--context TEXT] [--completed|--pending] [--id NEW_ID] [--parent <id>|none]")
+        print(
+            "  todo update <id> [--text TEXT] [--priority P] [--due YYYY-MM-DD] [--category NAME] [--assignee NAME] [--context TEXT] [--completed|--pending] [--id NEW_ID] [--parent <id>|none]"
+        )
         print("  todo complete <id>")
         print("  todo remove <id> [--orphan|--cascade]")
         print("  todo stats")
